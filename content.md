@@ -141,32 +141,32 @@ mindmap
 ```mermaid
 graph TD
     Start[开始缓存设计] --> Q1{数据规模?}
-    
+
     Q1 -->|单机GB级| Q2{并发量?}
     Q1 -->|分布式TB级| Q3{一致性要求?}
-    
+
     Q2 -->|<10万QPS| RedisSingle[Redis单机]
     Q2 -->|>10万QPS| Q4{读写比例?}
-    
+
     Q4 -->|读>>写| Sentinel[Redis Sentinel]
     Q4 -->|读写均衡| Cluster[Redis Cluster]
-    
+
     Q3 -->|强一致| CPSystem[CP系统: etcd/ZK + Cache]
     Q3 -->|最终一致| CAPSystem[AP系统: Redis Cluster]
-    
+
     RedisSingle --> Q5{持久化?}
     Sentinel --> Q6{分片策略?}
     Cluster --> Q7{客户端路由?}
-    
+
     Q5 -->|需要| RDB_AOF[RDB + AOF混合]
     Q5 -->|高速| NoPersis[禁用持久化]
-    
+
     Q6 -->|范围分片| PredSharded[预分片]
     Q6 -->|哈希分片| HashSharded[一致性哈希]
-    
+
     Q7 -->|智能客户端| SmartClient[JedisCluster]
     Q7 -->|代理层| Proxy[Codis/Redis Cluster Proxy]
-    
+
     Q8{缓存问题?} -->|穿透| BloomFilter[布隆过滤器]
     Q8 -->|雪崩| RandomTTL[随机TTL + 熔断]
     Q8 -->|击穿| Mutex[互斥锁/分布式锁]
@@ -183,29 +183,29 @@ graph TD
 graph LR
     A[客户端请求] --> B[事件循环: aeEventLoop]
     B --> C{命令类型?}
-    
+
     C -->|纯内存操作| D[O(1)/O(logN)复杂度]
     C -->|持久化操作| E[Fork子进程异步处理]
-    
+
     D --> F[epoll/kqueue多路复用]
     E --> G[Copy-on-Write零拷贝]
-    
+
     F --> H[总耗时 = 网络RTT + 内存操作]
     G --> I[主线程耗时 ≈ 0]
-    
+
     H --> J[瓶颈在网络而非CPU]
     I --> K[避免锁竞争开销]
-    
+
     J --> L[百万级QPS]
     K --> L
-    
+
     subgraph 数学证明
         M[吞吐量公式: QPS = 1 / (T_net + T_mem)]
         N[T_net ≈ 0.1ms, T_mem ≈ 1μs]
         O[∴ QPS ≈ 10,000]
         P[Pipeline优化: QPS↑10倍]
     end
-    
+
     L --> M
 ```
 
@@ -221,35 +221,36 @@ sequenceDiagram
     participant RedisMaster
     participant ChildProcess
     participant Disk
-    
+
     Client->>RedisMaster: SET key value (t0)
     RedisMaster->>RedisMaster: dirty++ (t1)
     RedisMaster->>RedisMaster: lastsave记录 (t2)
-    
+
     Note over RedisMaster: 触发BGSAVE条件
-    
+
     RedisMaster->>ChildProcess: fork() (t3)
     Note over RedisMaster,ChildProcess: COW共享内存
-    
+
     loop 事件循环
         Client->>RedisMaster: 继续处理命令 (t4-tn)
         RedisMaster->>RedisMaster: 修改页面触发Copy
     end
-    
+
     ChildProcess->>Disk: 写入RDB文件 (t5)
     ChildProcess->>RedisMaster: 退出信号 (t6)
-    
+
     RedisMaster->>Disk: rename临时文件 (t7)
-    
+
     alt 故障恢复
         Disk->>RedisMaster: 加载RDB (t8)
         Note over RedisMaster: 数据状态 = t3时刻快照
     end
-    
+
     Note right of RedisMaster: 数据一致性保证:<br/>1. 快照点原子性<br/>2. COW隔离变更<br/>3. 文件替换原子操作
 ```
 
 **形式化证明**：
+
 - **快照原子性**：`fork()`瞬间捕获内存状态S₀
 - **隔离性**：子进程视角满足∀t∈[t₃,t₆], State(t) = S₀
 - **持久性**：`rename()`系统调用保证文件替换原子性
@@ -267,20 +268,20 @@ graph TD
         R3[数据库压力: P_db = N_req × Q_cost]
         R4[系统崩溃: P_db > P_max]
     end
-    
+
     subgraph 防护策略
         S1[随机TTL: T_exp' = T_base + Δ, Δ∈[-δ, +δ]]
         S2[请求分散: N_req' = N_req / (2δ/T_step)]
         S3[压力降级: P_db' = N_req' × Q_cost]
         S4[系统稳定: P_db' < P_max]
     end
-    
+
     subgraph 数学验证
         M1[设: N_req = 10万, δ = 300秒]
         M2[则: N_req' = 10万 / (600/1) ≈ 167 QPS]
         M3[P_db' 降低 600倍]
     end
-    
+
     R1 --> S1
     R2 --> S2
     R3 --> S3
@@ -299,34 +300,34 @@ graph TD
 ```mermaid
 graph TD
     Start[写入数据] --> Q1{数据类型?}
-    
+
     Q1 -->|String| Q2{长度?}
     Q2 -->|<20字节| EMBSTR[编码: EMBSTR]
     Q2 -->|整数| INT[编码: INT]
     Q2 -->|其他| RAW[编码: RAW]
-    
+
     Q1 -->|Hash| Q3{元素数 & 长度?}
     Q3 |<512且<64字节| ZIPLIST[编码: ziplist]
     Q3 -->|不满足| HT[编码: hashtable]
-    
+
     Q1 -->|List| Q4{版本?}
     Q4 -->|<Redis 3.2| ZIPLIST2[编码: ziplist]
     Q4 -->|≥Redis 3.2| QUICKLIST[编码: quicklist]
-    
+
     Q1 -->|Set| Q5{元素类型?}
     Q5 -->|全整数 & <512| INTSET[编码: intset]
     Q5 -->|其他| DICT2[编码: dict]
-    
+
     Q1 -->|ZSet| Q6{元素数 & 长度?}
     Q6 -->|<128且<64字节| ZIPLIST3[编码: ziplist]
     Q6 -->|不满足| SKIPLIST[编码: skiplist+dict]
-    
+
     subgraph 转换逻辑
         T1[ziplist → hashtable: 当元素数>512或任一值>64字节]
         T2[intset → dict: 当元素数>512或非整数元素]
         T3[EMBSTR → RAW: 修改时自动转换]
     end
-    
+
     ZIPLIST --> T1
     INTSET --> T2
     EMBSTR --> T3
@@ -345,39 +346,39 @@ graph TD
         A[可用性]
         P[分区容错]
     end
-    
+
     subgraph RDB模式
         RDB_C[一致性: 弱]
         RDB_A[可用性: 强]
         RDB_P[分区容错: 有]
         RDB_S[快照间隔T: 数据丢失窗口 = T]
     end
-    
+
     subgraph AOF_ALWAYS
         AOF_C1[一致性: 最强]
         AOF_A1[可用性: 弱]
         AOF_P1[分区容错: 有]
         AOF_S1[性能: TPS < 1000]
     end
-    
+
     subgraph AOF_EVERYSEC
         AOF_C2[一致性: 较强]
         AOF_A2[可用性: 强]
         AOF_P2[分区容错: 有]
         AOF_S2[性能: TPS ≈ 5万]
     end
-    
+
     subgraph 混合模式
         MIX_C[一致性: 较强]
         MIX_A[可用性: 强]
         MIX_P[分区容错: 有]
         MIX_S[恢复速度: RDB级 + AOF精度]
     end
-    
+
     C --> AOF_C1
     A --> RDB_A
     P --> AOF_P2
-    
+
     style RDB_A fill:#90EE90
     style AOF_C1 fill:#FFB6C1
     style AOF_EVERYSEC fill:#87CEEB
@@ -385,6 +386,7 @@ graph TD
 ```
 
 **决策公式**：
+
 - **金融支付**: `Consistency > Availability` → AOF_ALWAYS
 - **互联网缓存**: `Availability > Consistency` → RDB + AOF_EVERYSEC
 - **通用场景**: `Balance` → 混合持久化
@@ -408,21 +410,21 @@ graph TD
 ```mermaid
 graph LR
     A[原始请求: N次RTT] --> B{优化手段?}
-    
+
     B -->|合并| C[Pipeline: 1次RTT]
     B -->|脚本| D[Lua: 0次RTT]
     B -->|连接池| E[复用TCP: 减少握手]
-    
+
     C --> F[吞吐量↑10倍]
     D --> G[原子性保证]
     E --> H[延迟↓50%]
-    
+
     subgraph 性能数据
         I[Pipeline 10k命令: 1ms]
         J[Lua脚本: 原子执行]
         K[连接池: 1万连接→100连接]
     end
-    
+
     F --> I
     G --> J
     H --> K
@@ -441,26 +443,26 @@ graph TB
         Hash[哈希理论]
         Clock[时钟算法]
     end
-    
+
     subgraph 系统层
         Linux[Linux Page Cache]
         CPU[CPU Cache MESI]
         DB[数据库Buffer Pool]
     end
-    
+
     subgraph 组件层
         RedisCore[Redis核心引擎]
         Memcached[Memcached引擎]
         Hazelcast[Hazelcast]
     end
-    
+
     subgraph 架构层
         Sentinel[Sentinel高可用]
         Cluster[Cluster分片]
         Codis[Codis代理]
         Twemproxy[Twemproxy]
     end
-    
+
     subgraph 应用层
         Session[会话缓存]
         Rank[排行榜]
@@ -468,33 +470,33 @@ graph TB
         Queue[消息队列]
         RateLimit[限流]
     end
-    
+
     subgraph 治理层
         Monitor[监控体系]
         Alert[告警机制]
         Failover[故障转移]
         Backup[备份恢复]
     end
-    
+
     LRU --> RedisCore
     LFU --> RedisCore
     ARC --> Linux
     Hash --> RedisCore
     Clock --> Memcached
-    
+
     Linux --> RedisCore
     CPU --> RedisCore
-    
+
     RedisCore --> Sentinel
     RedisCore --> Cluster
     Memcached --> Twemproxy
-    
+
     Sentinel --> Session
     Cluster --> Rank
     RedisCore --> Lock
     RedisCore --> Queue
     RedisCore --> RateLimit
-    
+
     Sentinel --> Monitor
     Cluster --> Alert
     RedisCore --> Failover

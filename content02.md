@@ -131,6 +131,7 @@ typedef struct redisObject {
 ```
 
 **伪共享证明**：
+
 ```
 场景：两个CPU核心同时访问两个相邻的redisObject
 Cache Line A: [object1][object2][object3][object4] (64字节)
@@ -152,24 +153,25 @@ graph LR
         CPU0[CPU 0-7] --> LocalRAM0[本地内存<br/>延迟100ns]
         CPU0 --> CrossSwitch[交叉开关]
     end
-    
+
     subgraph NUMA Node 1
         CPU1[CPU 8-15] --> LocalRAM1[本地内存<br/>延迟100ns]
         CPU1 --> CrossSwitch
     end
-    
+
     CrossSwitch --> RemoteRAM0[Node 0远程内存<br/>延迟250ns]
     CrossSwitch --> RemoteRAM1[Node 1远程内存<br/>延迟250ns]
-    
+
     RedisProcess[Redis进程<br/>绑定CPU 0] --> LocalRAM0
     RedisProcess -.-> RemoteRAM1
-    
+
     subgraph 性能损失
         P[跨NUMA访问: 250ns vs 100ns<br/>性能下降60%]
     end
 ```
 
 **Redis部署建议**：
+
 ```bash
 # 将Redis进程绑定到单个NUMA节点
 numactl --cpunodebind=0 --membind=0 redis-server redis.conf
@@ -180,9 +182,10 @@ numactl --cpunodebind=0 --membind=0 redis-server redis.conf
 ### 2.3 SSD持久化性能分析
 
 **RDB写入性能模型**：
+
 ```
 fork()耗时 = 内存页表拷贝 = n_pages * 8字节/页表项 / 内存带宽
-           = (16GB / 4KB) * 8 / 20GB/s 
+           = (16GB / 4KB) * 8 / 20GB/s
            = 4,194,304 * 8 / 20,000,000,000
            ≈ 1.68ms (仅页表)
 
@@ -205,25 +208,26 @@ sequenceDiagram
     participant App as Redis Server
     participant Kernel as TCP/IP栈
     participant NIC as 网卡
-    
+
     App->>Kernel: write() (用户态→内核态)
     Note over Kernel: 内存拷贝: 500ns
     Kernel->>Kernel: TCP分段 + 校验和
     Note over Kernel: CPU计算: 200ns
     Kernel->>NIC: DMA传输
     Note over NIC: 延迟: 50ns (PCIe)
-    
+
     NIC->>Kernel: 硬中断 (数据到达)
     Note over Kernel: 中断处理: 5μs
     Kernel->>Kernel: 软中断 + TCP重组
     Note over Kernel: CPU处理: 10μs
     Kernel->>App: epoll通知可读
     Note over App: 延迟: 20μs
-    
+
     Note over App,K: 总延迟: ~36μs/包
 ```
 
 **Redis优化**：
+
 - **Pipeline**：将N个命令合并为1个RTT，减少syscall次数
 - **批量大小**：N=100时，延迟从36μs×100=3.6ms降至50μs
 
@@ -234,16 +238,16 @@ sequenceDiagram
 static int aeApiPoll(aeEventLoop *eventLoop, struct timeval *tvp) {
     int retval, numevents = 0;
     // 进入内核等待事件，超时或事件到达返回
-    retval = epoll_wait(epollfd, events, setsize, 
+    retval = epoll_wait(epollfd, events, setsize,
                         tvp ? (tvp->tv_sec*1000 + tvp->tv_usec/1000) : -1);
-    
+
     for (j = 0; j < retval; j++) {
         int mask = 0;
         struct epoll_event *e = events + j;
-        
+
         if (e->events & EPOLLIN) mask |= AE_READABLE;  // 读事件
         if (e->events & EPOLLOUT) mask |= AE_WRITABLE; // 写事件
-        
+
         // 将事件注册到 fired 数组
         eventLoop->fired[numevents].fd = e->data.fd;
         eventLoop->fired[numevents].mask = mask;
@@ -256,6 +260,7 @@ static int aeApiPoll(aeEventLoop *eventLoop, struct timeval *tvp) {
 ```
 
 **性能分析**：
+
 - **epoll_wait系统调用**：用户态→内核态切换成本 80ns
 - **事件处理**：每个客户端命令处理 5-10μs
 - **事件密度**：单线程可处理 1000客户端 → 吞吐量 = 1/(80ns + 10μs) ≈ 90k QPS
@@ -270,6 +275,7 @@ static int aeApiPoll(aeEventLoop *eventLoop, struct timeval *tvp) {
 | **io_uring** | 异步IO + 共享环 | Redis 7实验特性 | **50%** | **40%** |
 
 **Redis 7 io_uring性能**：
+
 ```
 传统read/write: 延迟 = 80ns (syscall) + 拷贝(200ns) = 280ns/次
 io_uring: 延迟 = 用户态提交(20ns) + 批量处理(50ns) = 70ns/次
@@ -307,12 +313,12 @@ sequenceDiagram
     participant Event as aeMain()
     participant Poll as aeApiPoll()
     participant Process as processEvents()
-    
+
     Main->>Event: aeCreateEventLoop()
     activate Event
     Event->>Event: 初始化events数组
     Event->>Event: 注册beforesleep回调
-    
+
     loop 每秒1000次
         Event->>Event: beforesleep() // 处理AOF/fsync
         Event->>Poll: aeApiPoll(1ms超时)
@@ -320,7 +326,7 @@ sequenceDiagram
         Note over Poll: epoll_wait(1ms)
         Poll-->>Event: 返回numevents
         deactivate Poll
-        
+
         alt numevents > 0
             Event->>Process: 处理可读/可写事件
             activate Process
@@ -337,14 +343,15 @@ sequenceDiagram
             Note over Event: 清理过期key，触发BGSAVE
             deactivate Event
         end
-        
+
         Event->>Event: aftersleep() // IO线程唤醒
     end
-    
+
     deactivate Event
 ```
 
 **时间片分配**：
+
 - **epoll等待**：占总时间80%（空闲等待）
 - **命令处理**：占总时间15%（CPU密集型）
 - **时间事件**：占总时间5%（周期性任务）
@@ -357,7 +364,7 @@ int handleClientsWithPendingReadsUsingThreads(void) {
     // 将客户端均匀分配给IO线程
     for (j = 0; j < io_threads_num; j++)
         io_threads_list[j] = listCreate();
-    
+
     // 分发任务
     listIter li;
     listNode *ln;
@@ -369,12 +376,12 @@ int handleClientsWithPendingReadsUsingThreads(void) {
         listAddNodeTail(io_threads_list[target_id], c);
         item_id++;
     }
-    
+
     // 启动IO线程读取数据
     for (j = 0; j < io_threads_num; j++) {
         io_threads_pending[j] = listLength(io_threads_list[j]);
     }
-    
+
     // 等待所有IO线程完成
     while(1) {
         unsigned long pending = 0;
@@ -382,7 +389,7 @@ int handleClientsWithPendingReadsUsingThreads(void) {
             pending += io_threads_pending[j];
         if (pending == 0) break;
     }
-    
+
     // 主线程处理命令
     listRewind(server.clients_pending_read, &li);
     while((ln = listNext(&li))) {
@@ -407,12 +414,12 @@ graph LR
         C3 --> C4[TCP发送缓冲区]
         C4 --> C5[网卡DMA]
     end
-    
+
     subgraph 网络传输
         C5 --> N1[以太网: 50μs]
         N1 --> S1[到达服务器网卡]
     end
-    
+
     subgraph 服务器侧
         S1 --> S2[硬中断]
         S2 --> S3[软中断]
@@ -426,26 +433,27 @@ graph LR
         S10 --> S11[sendReplyToClient: 5μs]
         S11 --> S12[write()系统调用]
     end
-    
+
     subgraph 返回路径
         S12 --> N2[网络返回: 50μs]
         N2 --> C6[客户端收到]
     end
-    
+
     C5 -.-> S1
     S12 -.-> C6
-    
+
     subgraph 总延迟分解
         L1[客户端: 20μs] --> L2[网络: 100μs]
         L2 --> L3[服务器处理: 25μs]
         L3 --> L4[网络返回: 50μs]
         L4 --> L5[客户端: 10μs]
     end
-    
+
     style L3 fill:#90EE90
 ```
 
 **关键路径优化**：
+
 - **Pipeline**：合并N个命令，客户端耗时从`N×20μs`降至`20μs + N×1μs`
 - **批量写入**：减少`write()`调用次数， syscall 成本从`N×80ns`降至`80ns`
 - **性能提升**：100条命令批量执行，延迟从`2050μs`降至`125μs`（降低94%）
@@ -458,23 +466,23 @@ graph TD
         A1[命令执行] --> A2[aof_buf追加: memcpy: 50ns]
         A2 --> A3[beforesleep回调]
         A3 --> A4{appendfsync策略}
-        
+
         A4 -->|always| A5[fsync(): 500μs~5ms]
         A4 -->|everysec| A6[每秒fsync一次: 500ms内随机]
         A4 -->|no| A7[依赖OS: 30秒一次]
-        
+
         A5 --> A8[返回客户端]
-        
+
         A6 --> A9[后台线程]
         A9 --> A10[主线程不阻塞]
-        
+
         subgraph 磁盘写入
             A5 --> D1[page cache: 50ns]
             D1 --> D2[NVMe SSD: 50μs]
             D2 --> D3[持久化完成]
         end
     end
-    
+
     subgraph RDB数据流
         R1[BGSAVE触发] --> R2[fork(): 100ms]
         R2 --> R3[子进程遍历数据库]
@@ -482,14 +490,14 @@ graph TD
         R4 --> R5[rename()原子替换]
         R5 --> R6[完成通知]
     end
-    
+
     subgraph 复制数据流
         C1[命令执行] --> C2[replicationFeedSlaves()]
         C2 --> C3[写入repl_backlog: memcpy]
         C3 --> C4[遍历所有slave]
         C4 --> C5[写入slave socket缓冲区]
         C5 --> C6[TCP发送到从节点]
-        
+
         subgraph 从节点接收
             C6 --> S1[读取repl buffer]
             S1 --> S2[执行命令]
@@ -499,6 +507,7 @@ graph TD
 ```
 
 **延迟敏感度排序**：
+
 1. **AOF always**: 500μs-5ms（磁盘fsync）→ 主线程阻塞
 2. **fork()**: 50-100ms（内存页表）→ 主线程阻塞
 3. **网络RTT**: 50-200μs → 主线程非阻塞
@@ -516,18 +525,18 @@ int performEvictions(void) {
     while (mem_used > mem_limit) {
         int bestclock = 0;
         sds bestkey = NULL;
-        
+
         // 随机采样5个key
         for (int j = 0; j < REDIS_LRU_SAMPLE_SIZE; j++) {
             dictEntry *de = dictGetRandomKey(db->dict);
             unsigned long long lru = getLRUClock() - de->lru;
-            
+
             if (!bestkey || lru > bestclock) {
                 bestclock = lru;
                 bestkey = dictGetKey(de);
             }
         }
-        
+
         // 淘汰最旧的key
         if (bestkey) dbDelete(db, bestkey);
     }
@@ -547,6 +556,7 @@ int performEvictions(void) {
 | **W-TinyLFU** | 窗口过滤 | 6字节/key | 92% | 65% |
 
 **数学证明**：
+
 - **采样效率**：5次采样找到最旧key的概率 $P = 1 - (1 - \frac{1}{N})^5 \approx \frac{5}{N}$（N=1万时，命中率78%）
 - **内存节省**：3字节 vs 16字节，内存降低**81%**，适合大规模缓存
 
@@ -567,7 +577,7 @@ typedef struct dictEntry {
 
 // 负载因子控制
 static int _dictExpandIfNeeded(dict *d) {
-    if (d->ht[0].used >= d->ht[0].size && 
+    if (d->ht[0].used >= d->ht[0].size &&
         (dict_can_resize || d->ht[0].used/d->ht[0].size > dict_force_resize_ratio)) {
         return dictExpand(d, d->ht[0].used * 2);
     }
@@ -579,13 +589,13 @@ int dictRehash(dict *d, int n) {
     int empty_visits = n*10;
     while(n-- && d->ht[0].used != 0) {
         dictEntry *de, *nextde;
-        
+
         // 跳过空桶
         while(d->ht[0].table[d->rehashidx] == NULL) {
             d->rehashidx++;
             if (--empty_visits == 0) return 1;
         }
-        
+
         de = d->ht[0].table[d->rehashidx];
         while(de) {
             uint64_t h;
@@ -604,6 +614,7 @@ int dictRehash(dict *d, int n) {
 ```
 
 **性能模型**：
+
 - **rehash成本**：每次访问额外耗时 `1/rehash桶数` ≈ 0.1μs
 - **内存利用率**：负载因子1.0时，内存占用 = 条目数 × 24字节 × (1 + 链表开销)
 - **碰撞概率**：MurmurHash2 + 链地址法，10万元素在65536桶中，平均链表长度1.5，查询耗时O(1.5)
@@ -633,11 +644,13 @@ int zslRandomLevel(void) {
 ```
 
 **时间复杂度证明**：
+
 - **搜索**：从最高层开始，每层跳过P比例节点，期望搜索路径长度 $O(\log_{1/P} N) = O(\log N)$
 - **插入**：先搜索定位，再更新每层指针，复杂度 $O(\log N)$
 - **内存**：平均每个节点 `1/(1-P)` 个指针，当P=0.25时，内存开销≈1.33×单链表
 
 **与平衡树对比**：
+
 | **指标** | **跳表** | **红黑树** | **结论** |
 |----------|----------|------------|----------|
 | **实现难度** | 简单 | 复杂 | 跳表胜 |
@@ -659,26 +672,26 @@ graph TD
         L2 --> L3[操作系统: 10μs]
         L3 --> L4[硬件: 100ns]
     end
-    
+
     subgraph 抖动来源
         J1[fork()阻塞: 50ms] --> J2[AOF fsync: 5ms]
         J2 --> J3[GC停顿: 1ms]
         J3 --> J4[网卡中断: 50μs]
         J4 --> J5[CPU调度: 10μs]
     end
-    
+
     subgraph 分布模型
         D1[正态分布: 命令执行] --> D2[指数分布: 网络]
         D2 --> D3[长尾分布: 磁盘fsync]
         D3 --> D4[双峰分布: fork()前后]
     end
-    
+
     subgraph P99优化
         O1[避免fork()] --> O2[SSD + no-appendfsync-on-rewrite]
         O2 --> O3[CPU绑定 + 禁用Swap]
         O3 --> O4[内核参数优化: tcp_nodelay]
     end
-    
+
     J2 -.-> D3
     J1 -.-> D4
     O4 --> L4
@@ -712,11 +725,13 @@ Max   : 52,000μs   (fork()期间)
 ### 7.2 Little定律在Redis中的应用
 
 **Little定律**：$L = \lambda W$
+
 - $L$：系统中平均客户端数（并发连接）
 - $\lambda$：到达率（QPS）
 - $W$：平均延迟
 
 **Redis实例容量规划**：
+
 ```
 已知: 单机目标QPS = 50,000
       平均延迟 = 200μs (P99)
@@ -742,29 +757,29 @@ graph TD
     subgraph 初始故障
         F1[某个Slave节点网络抖动<br/>1%丢包率]
     end
-    
+
     subgraph 第一层放大
         F1 --> A1[复制超时: 5秒]
         A1 --> A2[Master缓冲区积压]
         A2 --> A3[repl_buffer内存增长: 10MB/s]
-        
+
         A3 --> B1[Master触发 eviction]
         B1 --> B2[缓存命中率下降: 95%→80%]
         B2 --> B3[数据库查询增加: 5倍]
     end
-    
+
     subgraph 第二层雪崩
         B3 --> C1[数据库CPU 100%]
         C1 --> C2[查询延迟↑: 10ms→500ms]
         C2 --> C3[客户端超时重试: 3次]
         C3 --> C4[总流量放大: 15倍]
     end
-    
+
     subgraph 第三层崩溃
         C4 --> D1[数据库连接池耗尽]
         D1 --> D2[服务整体不可用]
     end
-    
+
     subgraph 恢复过程
         D2 --> E1[网络恢复]
         E1 --> E2[Slave重连]
@@ -772,25 +787,27 @@ graph TD
         E3 --> E4[同步完成: 10分钟]
         E4 --> E5[系统恢复]
     end
-    
+
     subgraph 时间轴
         T[0s: 丢包开始] --> T1[5s: 复制中断]
         T1 --> T2[10s: Master内存满]
         T2 --> T3[15s: 数据库崩溃]
         T3 --> T4[600s: 完全恢复]
     end
-    
+
     F1 -.-> T
     D2 -.-> T3
     E5 -.-> T4
 ```
 
 **动态特征总结**：
+
 - **非线性放大**：1%丢包 → 15倍流量放大
 - **延迟传播**：故障影响在5-15秒级联
 - **恢复时间**：指数级增长，全量同步需要10+分钟
 
 **防护策略**：
+
 1. **慢查询监控**：`latency monitor`阈值10ms
 2. **连接数限制**：`maxclients`防止资源耗尽
 3. **熔断降级**：Hystrix在客户端限流
@@ -817,12 +834,14 @@ $$
 $$
 
 **各部分占比（P99）**：
+
 - $T_{\text{网络}}$ = 100μs (40%)
 - $T_{\text{内核}}$ = 20μs (8%)
 - $T_{\text{Redis}}$ = 30μs (12%)
 - $T_{\text{抖动}}$ = 100μs (40%) ← **优化重点**
 
 **抖动来源分解**：
+
 - AOF fsync: 50μs (20%)
 - fork(): 30μs (12%)
 - 慢查询: 15μs (6%)
@@ -843,6 +862,7 @@ Redis的高性能不是单一技术的胜利，而是**硬件加速 + 算法优�
 ```
 
 这种**乘法效应**源于每一层都消除了下一层的瓶颈：
+
 - **硬件层**：消除内存拷贝和跨NUMA延迟
 - **网络层**：消除系统调用和中断开销
 - **算法层**：消除O(N)复杂度和内存碎片

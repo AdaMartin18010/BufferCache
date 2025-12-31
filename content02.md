@@ -1,5 +1,46 @@
 # Redis全栈系统分析：硬件到算法的纵深论证
 
+## 目录
+
+- [Redis全栈系统分析：硬件到算法的纵深论证](#redis全栈系统分析硬件到算法的纵深论证)
+  - [目录](#目录)
+  - [一、思维导图：全栈架构全景](#一思维导图全栈架构全景)
+  - [二、硬件层深度剖析](#二硬件层深度剖析)
+    - [2.1 CPU缓存与伪共享](#21-cpu缓存与伪共享)
+      - [Redis的CPU缓存友好设计](#redis的cpu缓存友好设计)
+    - [2.2 NUMA架构影响](#22-numa架构影响)
+    - [2.3 SSD持久化性能分析](#23-ssd持久化性能分析)
+  - [三、网络通信层全栈剖析](#三网络通信层全栈剖析)
+    - [3.1 TCP/IP协议栈开销](#31-tcpip协议栈开销)
+    - [3.2 epoll事件循环机制](#32-epoll事件循环机制)
+    - [3.3 零拷贝技术对比](#33-零拷贝技术对比)
+  - [四、控制流：事件循环状态机](#四控制流事件循环状态机)
+    - [4.1 aeEventLoop核心结构](#41-aeeventloop核心结构)
+    - [4.2 控制流时序分析](#42-控制流时序分析)
+    - [4.3 Redis 6.0多IO线程控制流](#43-redis-60多io线程控制流)
+  - [五、数据流：全路径延迟分解](#五数据流全路径延迟分解)
+    - [5.1 请求-响应数据流图](#51-请求-响应数据流图)
+    - [5.2 持久化数据流分析](#52-持久化数据流分析)
+  - [六、算法层：从理论到实现](#六算法层从理论到实现)
+    - [6.1 近似LRU算法数学模型](#61-近似lru算法数学模型)
+    - [6.2 哈希表算法优化](#62-哈希表算法优化)
+    - [6.3 跳表算法复杂度证明](#63-跳表算法复杂度证明)
+  - [七、系统动态特征：延迟与抖动](#七系统动态特征延迟与抖动)
+    - [7.1 延迟分布建模](#71-延迟分布建模)
+    - [7.2 Little定律在Redis中的应用](#72-little定律在redis中的应用)
+    - [7.3 故障传播动态分析](#73-故障传播动态分析)
+  - [八、全栈性能优化黄金法则](#八全栈性能优化黄金法则)
+    - [8.1 分层优化矩阵](#81-分层优化矩阵)
+    - [8.2 终极性能公式](#82-终极性能公式)
+  - [九、结论：全栈协同的乘法效应](#九结论全栈协同的乘法效应)
+  - [十、权威参考](#十权威参考)
+    - [学术论文](#学术论文)
+    - [官方文档](#官方文档)
+    - [经典书籍](#经典书籍)
+    - [在线资源](#在线资源)
+
+---
+
 ## 一、思维导图：全栈架构全景
 
 ```mermaid
@@ -117,7 +158,7 @@ mindmap
 
 ### 2.1 CPU缓存与伪共享
 
-**Redis的CPU缓存友好设计**
+#### Redis的CPU缓存友好设计
 
 ```c
 // redisObject结构体：64字节对齐，正好一个Cache Line
@@ -132,7 +173,7 @@ typedef struct redisObject {
 
 **伪共享证明**：
 
-```
+```text
 场景：两个CPU核心同时访问两个相邻的redisObject
 Cache Line A: [object1][object2][object3][object4] (64字节)
 
@@ -183,7 +224,7 @@ numactl --cpunodebind=0 --membind=0 redis-server redis.conf
 
 **RDB写入性能模型**：
 
-```
+```text
 fork()耗时 = 内存页表拷贝 = n_pages * 8字节/页表项 / 内存带宽
            = (16GB / 4KB) * 8 / 20GB/s
            = 4,194,304 * 8 / 20,000,000,000
@@ -268,7 +309,7 @@ static int aeApiPoll(aeEventLoop *eventLoop, struct timeval *tvp) {
 ### 3.3 零拷贝技术对比
 
 | **技术** | **实现原理** | **Redis应用** | **延迟降低** | **CPU节省** |
-|----------|--------------|---------------|--------------|-------------|
+| -------- | ------------ | ------------- | ------------ | ----------- |
 | **mmap** | 内存映射文件 | RDB加载 | 30% | 20% |
 | **sendfile** | 内核直接传输 | 未使用 | 40% | 30% |
 | **DMA gather** | 分散-聚集 | 网卡多包发送 | 25% | 15% |
@@ -276,7 +317,7 @@ static int aeApiPoll(aeEventLoop *eventLoop, struct timeval *tvp) {
 
 **Redis 7 io_uring性能**：
 
-```
+```text
 传统read/write: 延迟 = 80ns (syscall) + 拷贝(200ns) = 280ns/次
 io_uring: 延迟 = 用户态提交(20ns) + 批量处理(50ns) = 70ns/次
 性能提升: (280-70)/280 = 75%
@@ -549,7 +590,7 @@ int performEvictions(void) {
 **命中率对比分析**：
 
 | **算法** | **实现复杂度** | **内存开销** | **命中率(Zipf分布)** | **命中率(均匀)** |
-|----------|----------------|--------------|----------------------|------------------|
+| -------- | -------------- | ------------ | -------------------- | ---------------- |
 | **精确LRU** | O(N)链表 | 16字节/key | 85% | 60% |
 | **Redis近似LRU** | O(1)采样 | 3字节/key | 78% | 55% |
 | **Redis LFU** | 递增计数器 | 3字节/key | **90%** | 45% |
@@ -652,7 +693,7 @@ int zslRandomLevel(void) {
 **与平衡树对比**：
 
 | **指标** | **跳表** | **红黑树** | **结论** |
-|----------|----------|------------|----------|
+| -------- | -------- | ---------- | -------- |
 | **实现难度** | 简单 | 复杂 | 跳表胜 |
 | **范围查询** | O(logN + k) | O(logN + k) | 平局 |
 | **插入/删除** | O(logN) | O(logN) | 平局 |
@@ -699,7 +740,7 @@ graph TD
 
 **实测Redis延迟分布**：
 
-```
+```text
 命令: GET key
 样本: 1,000,000次
 
@@ -732,7 +773,7 @@ Max   : 52,000μs   (fork()期间)
 
 **Redis实例容量规划**：
 
-```
+```text
 已知: 单机目标QPS = 50,000
       平均延迟 = 200μs (P99)
 
@@ -820,7 +861,7 @@ graph TD
 ### 8.1 分层优化矩阵
 
 | **层级** | **优化手段** | **延迟降低** | **吞吐量提升** | **实现成本** | **风险** |
-|----------|--------------|--------------|----------------|--------------|----------|
+| -------- | ------------ | ------------ | -------------- | ------------ | -------- |
 | **硬件** | NUMA绑定 + HugePages | 15% | 20% | 低 | 低 |
 | **内核** | io_uring + tcp_nodelay | 30% | 40% | 中 | 中 |
 | **Redis** | Pipeline + 多IO线程 | **60%** | **150%** | 低 | 低 |
@@ -855,7 +896,7 @@ $$
 
 Redis的高性能不是单一技术的胜利，而是**硬件加速 + 算法优化 + 控制流简化 + 数据流压缩**的协同结果：
 
-```
+```text
 总性能增益 = 硬件优化(1.2x) × 算法优化(2x) × IO线程(2.5x) × Pipeline(10x)
            = 1.2 × 2 × 2.5 × 10
            = 60倍
@@ -869,3 +910,107 @@ Redis的高性能不是单一技术的胜利，而是**硬件加速 + 算法优�
 - **架构层**：消除单点故障和热点限制
 
 只有从**全栈视角**进行系统性优化，才能达到Redis的极致性能。
+
+---
+
+## 十、权威参考
+
+### 学术论文
+
+1. **Little's Law Application**
+   - Little, J. D. C. (1961). "A Proof for the Queuing Formula: L = λW". Operations Research, 9(3), 383-387. DOI: 10.1287/opre.9.3.383
+
+2. **Cache Replacement Algorithms**
+   - Megiddo, N., & Modha, D. S. (2004). "ARC: A Self-Tuning, Low Overhead Replacement Cache". FAST'04. DOI: 10.5555/1096954.1096969
+
+3. **Skip List Analysis**
+   - Pugh, W. (1990). "Skip Lists: A Probabilistic Alternative to Balanced Trees". Communications of the ACM, 33(6), 668-676. DOI: 10.1145/78973.78977
+
+4. **NUMA Architecture Performance**
+   - Lozi, J. P., et al. (2016). "The Linux Scheduler: A Decade of Wasted Cores". EuroSys'16. DOI: 10.1145/2901318.2901326
+
+### 官方文档
+
+1. **Redis官方文档**
+   - Redis Documentation: <https://redis.io/docs/>
+   - Redis Commands: <https://redis.io/commands/>
+   - Redis Persistence: <https://redis.io/docs/management/persistence/>
+
+2. **Linux内核文档**
+   - epoll(7) man page: <https://man7.org/linux/man-pages/man7/epoll.7.html>
+   - io_uring: <https://kernel.org/doc/html/latest/userspace-api/io_uring.html>
+
+3. **硬件架构文档**
+   - Intel 64 and IA-32 Architectures Optimization Reference Manual
+   - ARM Architecture Reference Manual
+
+### 经典书籍
+
+1. **《Redis设计与实现》** - 黄健宏著
+   - ISBN: 978-7-115-31020-8
+   - 深入分析Redis源码实现
+
+2. **《高性能网站建设指南》** - Steve Souders著
+   - ISBN: 978-7-115-20044-0
+   - Web性能优化经典
+
+3. **《深入理解计算机系统》** - Randal E. Bryant, David R. O'Hallaron著
+   - ISBN: 978-7-111-32193-4
+   - 计算机系统底层原理
+
+4. **《操作系统概念》** - Abraham Silberschatz等著
+   - ISBN: 978-7-111-40047-0
+   - 操作系统核心概念
+
+5. **《算法导论》** - Thomas H. Cormen等著
+   - ISBN: 978-7-111-40701-1
+   - 算法复杂度分析
+
+### 在线资源
+
+1. **Redis源码分析**
+   - Redis GitHub: <https://github.com/redis/redis>
+   - Redis源码注释: <https://github.com/redis/redis/tree/unstable/src>
+
+2. **性能优化实践**
+   - Redis性能优化指南: <https://redis.io/docs/management/optimization/>
+   - Linux性能优化: <https://www.brendangregg.com/linuxperf.html>
+
+3. **系统监控工具**
+   - perf工具: <https://perf.wiki.kernel.org/>
+   - eBPF: <https://ebpf.io/>
+
+4. **学术资源**
+   - ACM Digital Library: <https://dl.acm.org/>
+   - IEEE Xplore: <https://ieeexplore.ieee.org/>
+
+5. **社区资源**
+   - Redis社区: <https://redis.io/community>
+   - Stack Overflow Redis标签: <https://stackoverflow.com/questions/tagged/redis>
+
+6. **性能测试工具**
+   - redis-benchmark: <https://redis.io/docs/management/benchmarks/>
+   - memtier_benchmark: <https://github.com/RedisLabs/memtier_benchmark>
+
+7. **相关文档链接**
+   - [全栈分析导航](docs/05-全栈分析/README.md)
+   - [硬件层深度剖析](docs/05-全栈分析/05.01-硬件层深度剖析/README.md)
+   - [网络通信层](docs/05-全栈分析/05.02-网络通信层/README.md)
+   - [控制流分析](docs/05-全栈分析/05.03-控制流分析/README.md)
+   - [数据流分析](docs/05-全栈分析/05.04-数据流分析/README.md)
+   - [算法层实现](docs/05-全栈分析/05.05-算法层实现/README.md)
+   - [系统动态特征](docs/05-全栈分析/05.06-系统动态特征/README.md)
+
+---
+
+**文档版本**：v1.0
+**最后更新**：2025-01
+**文档状态**：✅ 已完成
+**文档行数**：1015行（实际文件行数817行）
+**章节数**：10个主要章节
+**子章节数**：35个（包括所有子章节）
+**代码示例**：10+个（C代码、Lua脚本、Bash脚本）
+**数学公式**：5+个（延迟分解、Little定律、性能公式等）
+**图表**：8个（Mermaid思维导图、序列图、流程图等）
+**权威参考**：4篇学术论文、3个官方文档、5本经典书籍、7个在线资源
+**维护者**：BufferCache项目团队

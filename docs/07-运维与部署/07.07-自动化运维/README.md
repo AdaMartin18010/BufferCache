@@ -8,7 +8,7 @@
 
 ### 07.07.01 自动化运维平台 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Rundeck实践**：Rundeck部署、Job配置、工作流设计、权限管理
 - **Ansible Tower实践**：Ansible Tower部署、Playbook管理、Inventory管理、权限管理

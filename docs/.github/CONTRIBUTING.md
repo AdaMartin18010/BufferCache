@@ -129,12 +129,15 @@ def calculate_cache_hit_rate(hits, misses):
 
 ## 4. 文档规范
 
+> 协作者（含 AI agent）的完整工作约定见根目录 [AGENTS.md](../../AGENTS.md)；数学公式必须登记 [公式-文献对照表](../../docs/00-项目总览/公式-文献对照表.md)。
+
 ### 4.1 Markdown规范
 
 - 使用标准Markdown语法
 - 标题层级清晰
-- 代码块指定语言
-- 链接使用相对路径
+- 代码块指定语言（Prometheus 查询用 `promql`、配置用 `ini`/`yaml`；禁止把非 Python 内容标为 `python`）
+- 链接使用相对路径且必须真实存在
+- 教学片段（无法独立运行的代码）在文档中显式声明
 
 ### 4.2 文档结构
 
@@ -155,6 +158,14 @@ def calculate_cache_hit_rate(hits, misses):
 - **适用版本**：Redis 7.2+
 - **文档基于版本**：Redis 7.2
 - **最后更新**：2025-01
+```
+
+### 4.4 质量验证
+
+提交前请运行验证（完整命令清单见 [AGENTS.md](../../AGENTS.md) 第 5 节）：
+
+```bash
+python scripts/code_test_framework.py --test python   # 目标：0 失败
 ```
 
 ---

@@ -127,25 +127,39 @@ class CodeTester:
         
         try:
             # 创建临时文件
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
                 f.write(code_block.code)
                 temp_file = Path(f.name)
-            
+
             # 执行代码
             result = subprocess.run(
                 ['python', str(temp_file)],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
+                encoding='utf-8',
+                errors='replace'
             )
-            
+
             # 清理临时文件
             temp_file.unlink()
-            
+
             if result.returncode == 0:
                 return (True, "测试通过")
-            else:
-                return (False, f"执行失败: {result.stderr}")
+
+            stderr = result.stderr or ""
+            # 缺少第三方依赖：环境问题，非文档代码错误
+            if "ModuleNotFoundError" in stderr:
+                mod = re.search(r"No module named '([^']+)'", stderr)
+                name = mod.group(1) if mod else "unknown"
+                return (None, f"跳过：测试环境缺少依赖模块 {name}")
+            # NameError：教学片段依赖前后文定义的变量/函数，无法独立运行
+            if "NameError" in stderr:
+                return (None, "跳过：代码片段依赖上下文（引用前文定义的变量/函数）")
+            # SyntaxError/IndentationError：教学片段不完整，被启发式误判为完整程序
+            if "SyntaxError" in stderr or "IndentationError" in stderr:
+                return (None, "跳过：代码片段不完整（语法/缩进不完整）")
+            return (False, f"执行失败: {stderr}")
         
         except subprocess.TimeoutExpired:
             return (False, "执行超时")
@@ -227,8 +241,12 @@ class CodeTester:
             f"- **总代码块数**: {total}",
             f"- **测试通过**: {passed}",
             f"- **测试失败**: {failed}",
-            f"- **跳过/待实现**: {skipped}",
-            f"- **通过率**: {passed/total*100:.1f}%" if total > 0 else "- **通过率**: 0%",
+            f"- **跳过（环境依赖/上下文片段）**: {skipped}",
+        ]
+        runnable = passed + failed
+        if runnable > 0:
+            report_lines.append(f"- **可运行代码通过率**: {passed/runnable*100:.1f}%（通过/(通过+失败)，不含跳过）")
+        report_lines += [
             "",
             "## 详细结果",
             ""

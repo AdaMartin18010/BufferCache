@@ -157,6 +157,20 @@
     - 物联网边缘缓存
     - 低延迟应用
 
+- **04.03.15** 大模型推理缓存架构（LLM KV Cache）✅ **已完成** ✨ **前沿新增**
+  - **文档**：[04.03.15-大模型推理缓存架构.md](./04.03.15-大模型推理缓存架构.md)
+  - **核心内容**：
+    - KV Cache内存模型与容量规划（MHA/GQA/MQA/MLA架构影响）
+    - 页式管理（vLLM PagedAttention）与前缀复用（SGLang RadixAttention、vLLM APC）
+    - 分层卸载（FlexGen、LMCache、CacheGen、HiCache：HBM→DRAM→SSD→Remote）
+    - 分离式架构（DistServe、Mooncake、NIXL、llm-d：P/D分离与分布式KV池）
+    - 容量优化（DeepSeek MLA低秩压缩、KV量化、注意力感知驱逐H2O/SnapKV/StreamingLLM）
+  - **典型场景**：
+    - 高并发LLM推理服务
+    - 长上下文（100K+）应用
+    - Agent/多轮对话系统
+    - 模型即服务（MaaS）平台
+
 ## 3. 行业架构对比
 
 不同行业场景的缓存架构选择对比分析：

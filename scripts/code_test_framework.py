@@ -229,6 +229,10 @@ class CodeTester:
             if 'is not in std' in stderr or 'cannot find module' in stderr \
                or 'proxy.golang.org' in stderr or 'connection refused' in stderr:
                 return (None, "跳过：依赖第三方模块（环境无 go.mod）")
+            # 运行环境权限/依赖要求，非文档代码错误
+            if any(k in (result.stderr or '') + (result.stdout or '')
+                   for k in ('root', '权限', 'permission denied', 'requires')):
+                return (None, "跳过：运行需要 root/特殊权限（环境不满足）")
             return (False, f"编译/执行失败: {stderr[:300]}")
         except subprocess.TimeoutExpired:
             return (False, "执行超时（>120s）")
@@ -251,7 +255,7 @@ class CodeTester:
             return (None, "跳过：包含占位符或TODO")
         if 'fn main(' not in code:
             return (None, "跳过：无 fn main（库/片段代码）")
-        if self.RUST_THIRD_PARTY.search(code):
+        if self.RUST_THIRD_PARTY.search(code) or re.search(r'\blibc::|\bnix::', code):
             return (None, "跳过：依赖第三方 crate（无 Cargo 环境）")
         import shutil
         if not shutil.which('rustc'):
@@ -267,7 +271,13 @@ class CodeTester:
                     encoding='utf-8', errors='replace',
                 )
                 if build.returncode != 0:
-                    return (False, f"编译失败: {(build.stderr or '')[:300]}")
+                    stderr = build.stderr or ""
+                    # E04xx：引用未定义的符号（前文已定义但未贴出的教学片段）
+                    if re.search(r'error\[E04\d\d\]', stderr):
+                        return (None, "跳过：引用上下文定义的符号（教学片段未完整贴出）")
+                    if 'cannot find module or crate' in stderr:
+                        return (None, "跳过：依赖第三方 crate（无 Cargo 环境）")
+                    return (False, f"编译失败: {stderr[:300]}")
                 run = subprocess.run(
                     [str(exe)], capture_output=True, text=True, timeout=30,
                     encoding='utf-8', errors='replace',

@@ -33,7 +33,7 @@ docs/
 ├── ARCHIVE.md            归档说明
 └── INDEX.md              主索引（人与 agent 的入口）
 scripts/
-├── code_test_framework.py 文档代码块测试（Python 已实现，其他语言待做）
+├── code_test_framework.py 文档代码块测试（Python/Go/Rust/Bash 已实现：Go/Rust 编译运行完整程序，Bash 语法检查）
 ├── benchmark/trace_benchmark.py  Trace 驱动算法基准（LRU/LFU/S3-FIFO）
 └── formal/               TLA+ 规约（LRU/ARC 已通过 TLC）+ run.bat
 reports/                  code_scan_report.md / code_test_report.md（实测数据）
@@ -88,8 +88,13 @@ Testing/                  测试与自我验证体系：cases/ 五组 15 个用�
 python Testing/self_verify.py all          # 全量；--ci 模式失败非零退出
 python Testing/self_verify.py links --path AI_Skill   # 新技能提交前的链接自查
 
-# 1. 文档代码块测试（Python 全量，约 1 分钟；目标：0 失败）
+# 1. 文档代码块测试（Python 全量约 1 分钟，目标：0 失败）
 python scripts/code_test_framework.py --test python
+
+# 1b. 多语言代码块测试（Go/Rust 编译运行完整程序；Bash 仅语法检查 -- 平台守卫）
+python scripts/code_test_framework.py --test go     # 报告 code_test_report_go.md
+python scripts/code_test_framework.py --test rust   # 报告 code_test_report_rust.md
+python scripts/code_test_framework.py --test bash   # 报告 code_test_report_bash.md
 
 # 2. TLA+ 模型检查（Windows 直接运行；Linux/macOS 用 jar 命令）
 scripts/formal/run.bat

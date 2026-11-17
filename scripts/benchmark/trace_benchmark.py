@@ -169,11 +169,59 @@ def run(trace_gen, capacity: int, ops: int):
     return total, misses
 
 def load_csv_trace(path: str):
-    """加载 CSV trace：timestamp,key,size,op（size/op 列可选）"""
+    """加载 CSV trace，自动嗅探公开数据集常见列格式：
+
+    - 通用/合成: ``timestamp,key,size,op``（key 列必需，其余可选）
+    - Twitter/cluster 缓存 trace: ``key`` 或 ``Key`` / ``obj_id`` 单列
+    - MSR Cambridge 块 trace: ``Timestamp,Disk,Offset,Size,ReadOrWrite``
+      （无 key 列时按 (Disk,Offset) 组合为 key，块地址按 4KB 对齐聚合）
+    - 无表头单列：整行视作 key
+
+    返回 key 字符串的生成器。接入公开数据集时下载 CSV 后直接用 --trace 运行。
+    """
+    KEY_CANDIDATES = ('key', 'Key', 'KEY', 'obj_id', 'object_id', 'item', 'request_id')
+    DISK_COLS = ('Disk', 'disk', 'disk_id', 'DiskNumber', 'disknumber')
+    OFFSET_COLS = ('Offset', 'offset', 'block_id', 'BlockId', 'block', 'blkno')
+
+    def _pick(fieldnames, candidates):
+        for c in candidates:
+            if c in fieldnames:
+                return c
+        return None
+
     def gen():
         with open(path, newline='', encoding='utf-8') as f:
-            for row in csv.DictReader(f):
-                yield row['key']
+            sample = f.read(4096)
+            f.seek(0)
+            has_header = ',' in sample.split('\n', 1)[0] and any(
+                h.strip() in (KEY_CANDIDATES + DISK_COLS + OFFSET_COLS)
+                for h in sample.split('\n', 1)[0].split(',')
+            )
+            if has_header:
+                reader = csv.DictReader(f)
+                key_col = _pick(reader.fieldnames or [], KEY_CANDIDATES)
+                disk_col = _pick(reader.fieldnames or [], DISK_COLS)
+                off_col = _pick(reader.fieldnames or [], OFFSET_COLS)
+                for row in reader:
+                    if key_col:
+                        yield row[key_col]
+                    elif disk_col and off_col:
+                        # MSR 块地址按 4KB 聚合为缓存键
+                        try:
+                            yield f"{row[disk_col]}:{int(float(row[off_col])) // 4096}"
+                        except (ValueError, TypeError):
+                            continue
+                    else:
+                        # 首列兜底
+                        first = (reader.fieldnames or [''])[0]
+                        if first and row.get(first):
+                            yield row[first]
+            else:
+                reader2 = csv.reader(f)
+                for row in reader2:
+                    if row:
+                        yield row[0]
+
     return gen()
 
 def main():

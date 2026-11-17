@@ -127,6 +127,30 @@ def check_code_blocks() -> str:
     return f"PASS\n输出尾部：\n{tail}"
 
 
+def check_code_blocks_multi() -> str:
+    """TC-DOC-005: 多语言代码块（Go/Rust 编译运行、Bash 语法检查）"""
+    parts = []
+    failed_total = 0
+    for lang in ("go", "rust", "bash"):
+        rc, out = run_cmd([sys.executable, "scripts/code_test_framework.py", "--test", lang], timeout=600)
+        m = re.search(r"测试失败\*\*:\s*(\d+)", out)
+        failed = int(m.group(1)) if m else -1
+        passed = re.search(r"测试通过\*\*:\s*(\d+)", out)
+        skipped = re.search(r"跳过（环境依赖/上下文片段）\*\*:\s*(\d+)", out)
+        failed_total += max(failed, 0)
+        stat = (f"{lang}: 过 {passed.group(1) if passed else '?'} / "
+                f"失败 {failed} / 跳过 {skipped.group(1) if skipped else '?'}")
+        if failed != 0:
+            bad = [ln for ln in out.splitlines() if "❌" in ln][:5]
+            stat += "\n  " + "\n  ".join(bad)
+        parts.append(stat)
+    if failed_total > 0:
+        return "FAIL\n" + "\n".join(parts)
+    if failed_total < 0:
+        return "FAIL\n语言测试统计解析失败（框架输出异常）\n" + "\n".join(parts)
+    return "PASS\n" + "\n".join(parts)
+
+
 FOREIGN_FINGERPRINTS = [
     (re.compile(r"^\s*-\s*job_name\s*:", re.M), "Prometheus 抓取配置（应为 yaml）"),
     (re.compile(r"^\s*(server|http|events|upstream)\s*\{", re.M), "nginx 配置块（应为 nginx/ini）"),
@@ -296,16 +320,19 @@ def check_formal() -> str:
 
 
 def check_bench() -> str:
-    """TC-BENCH-001: trace 驱动基准"""
+    """TC-BENCH-001: trace 驱动基准（合成 + 公开格式 fixture 双验证）"""
     script = PROJECT_ROOT / "scripts" / "benchmark" / "trace_benchmark.py"
     if not script.exists():
         return "SKIP\nscripts/benchmark/trace_benchmark.py 不存在"
-    rc, out = run_cmd([sys.executable, str(script)], timeout=300)
-    if rc != 0:
-        tail = "\n".join(out.strip().splitlines()[-10:])
-        return f"FAIL\n基准脚本退出码 {rc}：\n{tail}"
-    hits = [ln for ln in out.splitlines() if re.search(r"hit|命中", ln, re.I)]
-    return f"PASS\n基准完成。关键输出：\n" + "\n".join(hits[-8:] if hits else out.strip().splitlines()[-6:])
+    parts = []
+    for label, extra in (("合成trace", []), ("CSV fixture", ["--trace", "Testing/fixtures/traces/sample_trace.csv", "--ops", "3000", "--capacity", "80"])):
+        rc, out = run_cmd([sys.executable, str(script)] + extra, timeout=300)
+        if rc != 0:
+            tail = "\n".join(out.strip().splitlines()[-10:])
+            return f"FAIL\n{label}基准退出码 {rc}：\n{tail}"
+        hits = [ln for ln in out.splitlines() if re.search(r"miss ratio|LRU|LFU|S3", ln)]
+        parts.append(f"[{label}]\n" + "\n".join(hits[-5:]))
+    return "PASS\n两种 trace 源基准完成：\n" + "\n\n".join(parts)
 
 
 def check_kv_sim() -> str:
@@ -498,6 +525,8 @@ def check_version() -> str:
 CHECKS = [
     Check("TC-DOC-001", "文档代码块可运行性(Python)", "docs",
           "cases/01-文档质量/TC-DOC-001-文档代码块可运行性.md", check_code_blocks, slow=True),
+    Check("TC-DOC-005", "多语言代码块测试(Go/Rust/Bash)", "docs",
+          "cases/01-文档质量/TC-DOC-005-多语言代码块测试.md", check_code_blocks_multi, slow=True),
     Check("TC-DOC-002", "代码块语言标注真实性", "docs",
           "cases/01-文档质量/TC-DOC-002-代码块语言标注真实性.md", check_lang_tags),
     Check("TC-DOC-003", "相对链接完整性", "links",

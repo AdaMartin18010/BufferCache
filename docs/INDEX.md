@@ -178,6 +178,7 @@
 
 - [MongoDB缓存机制](02-系统实现/02.03-数据库缓存/02.03.05-MongoDB缓存机制.md) ✨ **扩展**
 - [云数据库缓存架构](02-系统实现/02.03-数据库缓存/02.03.06-云数据库缓存架构.md) ✨ **前沿新增** - Aurora/PolarDB/Neon、存算分离、Heat Map 预热、共享内存池
+- [PostgreSQL18缓存能力与外部缓存边界](02-系统实现/02.03-数据库缓存/02.03.07-PostgreSQL18缓存能力与外部缓存边界.md) ✨ **新增** - PG18 AIO/pg_buffercache evict/"PG即缓存"国际评估/边界决策树 F19
 
 - [InnoDB Buffer Pool](02-系统实现/02.03-数据库缓存/02.03.01-InnoDB-Buffer-Pool.md) ✨
 - [MySQL Query Cache](02-系统实现/02.03-数据库缓存/02.03.02-MySQL-Query-Cache.md) ✨

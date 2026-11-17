@@ -637,6 +637,18 @@ def check_mkdocs() -> str:
             f"突增即按 TC-DOC-006 排查锚点漂移）")
 
 
+def check_assertions() -> str:
+    """F10: 技能-正文一致性巡检（事实断言清单驱动）"""
+    script = PROJECT_ROOT / "scripts" / "assertion_check.py"
+    if not script.exists():
+        return "SKIP\nscripts/assertion_check.py 不存在"
+    rc, out = run_cmd([sys.executable, str(script)], timeout=60)
+    drift = [ln for ln in out.splitlines() if ln.strip().startswith("[DRIFT]")]
+    if drift:
+        return "FAIL\n发现漂移：\n" + "\n".join(drift[:8]) + "\n（修正指引: 更新技能/正文/断言清单三端）"
+    return "PASS\n" + "\n".join(ln for ln in out.splitlines() if ln.startswith("[PASS]"))
+
+
 def check_version() -> str:
     """TC-INT-002: 版本监控"""
     script = PROJECT_ROOT / "scripts" / "version_monitor.py"
@@ -688,6 +700,8 @@ CHECKS = [
           "cases/03-运维部署/TC-SEC-001-仓库安全体检.md", check_security),
     Check("TC-DOC-006", "文档站点可构建(mkdocs)", "docs",
           "cases/01-文档质量/TC-DOC-006-文档站点构建检查.md", check_mkdocs, slow=True),
+    Check("TC-DOC-007", "技能-正文一致性巡检", "docs",
+          "cases/01-文档质量/TC-DOC-007-技能正文一致性巡检.md", check_assertions),
     Check("TC-CLUS-001~004", "集群演练清单(人工)", "cluster",
           "cases/04-集群", check_cluster),
     Check("TC-INT-001", "全量回归(本子集组合)", "all",

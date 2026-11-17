@@ -106,6 +106,8 @@ python scripts/benchmark/trace_benchmark.py
 # 3b. 一致性/容量工具（C6/D8 可执行验证）
 python scripts/consistency_check.py        # Cache-Aside 并发不一致窗口三策略对比
 python scripts/capacity_calculator.py      # 容量与成本估算（C 级参数，压测校准）
+python scripts/assertion_check.py        # 技能-正文一致性巡检（事实断言清单驱动）
+python scripts/benchmark/suite/bench_suite.py  # 场景化基准套件+回归检测（TC-BENCH-005）
 
 # 4. 链接自查（新文档提交前）
 #    用脚本检查新文档内全部 .md 相对链接可解析（参照历次验证做法）

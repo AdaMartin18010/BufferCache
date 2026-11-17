@@ -28,7 +28,7 @@ description: 学习驱动缓存替换（LeCaR/CACHEUS/LRB/Hawkeye/3L-Cache/KV驱
 | ---- | ---- | -------- | -------- |
 | LeCaR | 两专家 + 权重学习 | 每命中 O(1) 更新 | HotCloud 2018 |
 | Hawkeye | 分类器→优先级 | 训练离线、推理轻 | ISCA 2016 |
-| LRB | RL（A2C 系） | 推理在驱逐路径 | Song et al. 2020 |
+| LRB | RL（贝尔曼方程价值学习） | 推理在驱逐路径 | Song et al. 2020 |
 | CACHEUS | 自适应双专家 | 同 LeCaR 量级 | FAST 2021 |
 | 3L-Cache | 轻量 NN 学 Belady | 离线训练+在线推理 | FAST 2025 |
 

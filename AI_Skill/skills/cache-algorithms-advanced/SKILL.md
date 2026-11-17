@@ -80,6 +80,6 @@ python scripts/benchmark/trace_benchmark.py   # 预期：S3-FIFO 扫描负载下
 
 ## 8. 权威参考
 
-- **A 学术**：Megiddo & Modha, FAST 2003（ARC）；Johnson & Shasha, VLDB 1994（2Q）；Karedla et al., IEEE TOCS 1994（SLRU）；Jiang et al., USENIX ATC 2005（CLOCK-Pro）；Beckmann et al., NSDI 2018（LHD）；Einziger et al., ICDCS 2017（TinyLFU）；Yang et al., SOSP 2023（S3-FIFO）；Zhang et al., USENIX NSDI 2024（SIEVE）
+- **A 学术**：Megiddo & Modha, FAST 2003（ARC）；Johnson & Shasha, VLDB 1994（2Q）；Karedla et al., IEEE Computer 1994（SLRU）；Jiang et al., USENIX ATC 2005（CLOCK-Pro）；Beckmann et al., NSDI 2018（LHD）；Einziger et al., ICDCS 2017（TinyLFU）；Yang et al., SOSP 2023（S3-FIFO）；Zhang et al., USENIX NSDI 2024（SIEVE）
 - **B 官方**：USENIX NSDI'24 SIEVE 论文页；ScyllaDB issue #29047 评估记录（https://github.com/scylladb/scylladb/issues/29047）
 - **C 工程**：Caffeine（https://github.com/ben-manes/caffeine）；libCacheSim；cachemon（https://cachemon.github.io/）

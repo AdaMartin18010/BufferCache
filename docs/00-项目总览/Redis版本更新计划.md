@@ -212,25 +212,25 @@
 ### 新特性说明模板
 
 ```markdown
-## Redis 8.0新特性
+      ## Redis 8.0新特性
 
-### 特性名称
+      ### 特性名称
 
-**引入版本**：Redis 8.0
+      **引入版本**：Redis 8.0
 
-**功能描述**：
-[功能描述]
+      **功能描述**：
+      [功能描述]
 
-**使用示例**：
-```python
-# 代码示例
-```
+      **使用示例**：
+      ```python
+      # 代码示例
+      ```
 
-**性能影响**：
-[性能影响分析]
+      **性能影响**：
+      [性能影响分析]
 
-**兼容性说明**：
-[兼容性说明]
+      **兼容性说明**：
+      [兼容性说明]
 
 ```
 
@@ -240,9 +240,9 @@
 
 ### 官方文档
 
-- Redis 8.4 Release Notes: https://github.com/redis/redis/releases
-- Redis官方文档: https://redis.io/docs/
-- Redis GitHub: https://github.com/redis/redis
+- Redis 8.4 Release Notes: <https://github.com/redis/redis/releases>
+- Redis官方文档: <https://redis.io/docs/>
+- Redis GitHub: <https://github.com/redis/redis>
 
 ### 相关文档
 

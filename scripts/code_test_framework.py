@@ -16,6 +16,7 @@ BufferCache 项目代码示例测试框架
 
 import re
 import argparse
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -170,25 +171,146 @@ class CodeTester:
         """判断Python代码是否可独立运行"""
         # 简单的启发式判断
         # 如果代码包含函数定义、类定义或顶层执行代码，可能是可运行的
-        
+
         # 跳过明显的代码片段
         if code.count('\n') < 3:
             return False
-        
+
         # 检查是否有import但没有使用
         if 'import' in code and not any(keyword in code for keyword in ['def ', 'class ', 'if __name__', 'print(', '=']):
             return False
-        
+
         # 如果有函数或类定义，认为是可运行的
         if re.search(r'^(def |class |if __name__)', code, re.MULTILINE):
             return True
-        
+
         # 如果有顶层执行代码（不是注释），认为是可运行的
         lines = [line.strip() for line in code.split('\n') if line.strip() and not line.strip().startswith('#')]
         if len(lines) >= 3:
             return True
-        
+
         return False
+
+    # ---------------- Go ----------------
+
+    GO_THIRD_PARTY_IMPORT = re.compile(
+        r'^\s*(?:[\w.]+\s+)?"(?:github\.com|golang\.org|gopkg\.in|google\.golang\.org|k8s\.io|go\.uber\.org|golang\.org/x)/[^"]+"',
+        re.MULTILINE,
+    )
+
+    def test_go_code(self, code_block: CodeBlock) -> Tuple[bool, str]:
+        """测试Go代码：完整单文件程序 go run；片段/多文件跳过"""
+        code = code_block.code
+        if '...' in code or '// TODO' in code:
+            return (None, "跳过：包含占位符或TODO")
+        # 必须是完整单文件 main 程序
+        if 'package main' not in code or 'func main(' not in code:
+            return (None, "跳过：不是完整 main 程序（函数级教学片段）")
+        if re.search(r'^package\s+(?!main\b)\w+', code, re.MULTILINE):
+            return (None, "跳过：非 main 包（库代码片段）")
+        if self.GO_THIRD_PARTY_IMPORT.search(code):
+            return (None, "跳过：import 第三方模块（无 go.mod 环境）")
+        import shutil
+        if not shutil.which('go'):
+            return (None, "跳过：环境未安装 Go")
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                src = Path(tmp) / 'main.go'
+                src.write_text(code, encoding='utf-8')
+                result = subprocess.run(
+                    ['go', 'run', str(src)], cwd=tmp,
+                    capture_output=True, text=True, timeout=120,
+                    encoding='utf-8', errors='replace',
+                    env={**os.environ, 'GOFLAGS': '-mod=mod', 'GO111MODULE': 'off'},
+                )
+            if result.returncode == 0:
+                return (True, "测试通过")
+            stderr = result.stderr or ""
+            if 'is not in std' in stderr or 'cannot find module' in stderr \
+               or 'proxy.golang.org' in stderr or 'connection refused' in stderr:
+                return (None, "跳过：依赖第三方模块（环境无 go.mod）")
+            return (False, f"编译/执行失败: {stderr[:300]}")
+        except subprocess.TimeoutExpired:
+            return (False, "执行超时（>120s）")
+        except Exception as e:
+            return (False, f"测试出错: {str(e)}")
+
+    # ---------------- Rust ----------------
+
+    # ---------------- Rust ----------------
+
+    RUST_THIRD_PARTY = re.compile(
+        r"^\s*(?:use|extern\s+crate)\s+(tokio|serde|anyhow|thiserror|rand|reqwest|async_std|async_std|futures|hyper|warp|axum|actix|clap|log|env_logger|chrono|regex|lazy_static|once_cell|dashmap|parking_lot|crossbeam|rayon|libc|nix)\b",
+        re.MULTILINE,
+    )
+
+    def test_rust_code(self, code_block: CodeBlock) -> Tuple[bool, str]:
+        """测试Rust代码：rustc 编译检查，编译过则运行；外部 crate 跳过"""
+        code = code_block.code
+        if '...' in code or '// TODO' in code:
+            return (None, "跳过：包含占位符或TODO")
+        if 'fn main(' not in code:
+            return (None, "跳过：无 fn main（库/片段代码）")
+        if self.RUST_THIRD_PARTY.search(code):
+            return (None, "跳过：依赖第三方 crate（无 Cargo 环境）")
+        import shutil
+        if not shutil.which('rustc'):
+            return (None, "跳过：环境未安装 rustc")
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                src = Path(tmp) / 'main.rs'
+                exe = Path(tmp) / 'main'
+                src.write_text(code, encoding='utf-8')
+                build = subprocess.run(
+                    ['rustc', '--edition', '2021', '-o', str(exe), str(src)],
+                    capture_output=True, text=True, timeout=120,
+                    encoding='utf-8', errors='replace',
+                )
+                if build.returncode != 0:
+                    return (False, f"编译失败: {(build.stderr or '')[:300]}")
+                run = subprocess.run(
+                    [str(exe)], capture_output=True, text=True, timeout=30,
+                    encoding='utf-8', errors='replace',
+                )
+            if run.returncode == 0:
+                return (True, "测试通过")
+            return (False, f"运行失败(exit {run.returncode}): {(run.stderr or '')[:300]}")
+        except subprocess.TimeoutExpired:
+            return (False, "执行超时")
+        except Exception as e:
+            return (False, f"测试出错: {str(e)}")
+
+    # ---------------- Bash ----------------
+
+    def test_bash_code(self, code_block: CodeBlock) -> Tuple[bool, str]:
+        """测试Bash代码：仅语法检查（bash -n），不执行（遵守 §4.2.4 平台守卫禁令）"""
+        code = code_block.code
+        if code.count('\n') < 2:
+            return (None, "跳过：过短片段")
+        # 文档伪参数惯例 <pid>、<node-id> 会被 bash 当重定向符导致语法报错
+        if re.search(r'<[a-z][\w-]*>', code):
+            return (None, "跳过：包含 <placeholder> 参数占位（语法检查不适用）")
+        import shutil
+        bash = shutil.which('bash') or shutil.which('sh')
+        if not bash:
+            return (None, "跳过：环境未安装 bash")
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False, encoding='utf-8') as f:
+                f.write(code)
+                temp_file = Path(f.name)
+            result = subprocess.run(
+                [bash, '-n', str(temp_file)],
+                capture_output=True, text=True, timeout=30,
+                encoding='utf-8', errors='replace',
+            )
+            temp_file.unlink()
+            if result.returncode == 0:
+                return (True, "语法检查通过（未执行，平台守卫）")
+            return (False, f"语法错误: {(result.stderr or '')[:300]}")
+        except subprocess.TimeoutExpired:
+            return (False, "检查超时")
+        except Exception as e:
+            return (False, f"测试出错: {str(e)}")
     
     def test_all_code(self, all_blocks: Dict[str, List[CodeBlock]], language: str = None) -> List[Dict]:
         """测试所有代码"""
@@ -203,6 +325,36 @@ class CodeTester:
                 
                 if block.language == 'python':
                     success, message = self.test_python_code(block)
+                    results.append({
+                        'file': file_path,
+                        'language': block.language,
+                        'line_start': block.line_start,
+                        'line_end': block.line_end,
+                        'success': success,
+                        'message': message
+                    })
+                elif block.language == 'go':
+                    success, message = self.test_go_code(block)
+                    results.append({
+                        'file': file_path,
+                        'language': block.language,
+                        'line_start': block.line_start,
+                        'line_end': block.line_end,
+                        'success': success,
+                        'message': message
+                    })
+                elif block.language == 'rust':
+                    success, message = self.test_rust_code(block)
+                    results.append({
+                        'file': file_path,
+                        'language': block.language,
+                        'line_start': block.line_start,
+                        'line_end': block.line_end,
+                        'success': success,
+                        'message': message
+                    })
+                elif block.language in ('bash', 'sh', 'shell'):
+                    success, message = self.test_bash_code(block)
                     results.append({
                         'file': file_path,
                         'language': block.language,
@@ -283,12 +435,20 @@ class CodeTester:
         logger.info(f"测试报告已保存到: {report_path}")
 
 
+def save_report_for_language(tester: 'CodeTester', report: str, language: str):
+    """按语种保存报告，避免多语言轮跑互相覆盖（python 保持历史文件名）"""
+    if language == 'python':
+        tester.save_report(report)
+    else:
+        tester.save_report(report, f"code_test_report_{language}.md")
+
+
 def main():
     parser = argparse.ArgumentParser(description='BufferCache项目代码测试框架')
     parser.add_argument('--scan-all', action='store_true',
                        help='扫描所有文档中的代码块')
-    parser.add_argument('--test', choices=['python', 'all'],
-                       help='测试指定语言的代码')
+    parser.add_argument('--test', choices=['python', 'go', 'rust', 'bash', 'all'],
+                       help='测试指定语言的代码（go/rust 编译运行可独立程序，bash 仅语法检查）')
     parser.add_argument('--report', action='store_true',
                        help='生成测试报告')
     
@@ -315,7 +475,7 @@ def main():
         all_blocks = extractor.scan_all_docs()
         results = tester.test_all_code(all_blocks, args.test)
         report = tester.generate_test_report(results)
-        tester.save_report(report)
+        save_report_for_language(tester, report, args.test)
         print("\n" + "="*60)
         print(report)
         print("="*60)

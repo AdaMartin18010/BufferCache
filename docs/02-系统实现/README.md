@@ -36,17 +36,17 @@
 
 ### 02.03 数据库缓存
 
-- **02.03.01** [InnoDB Buffer Pool](../02.03-数据库缓存/02.03.01-InnoDB-Buffer-Pool.md)
-- **02.03.02** [MySQL Query Cache](../02.03-数据库缓存/02.03.02-MySQL-Query-Cache.md)
-- **02.03.03** [PostgreSQL Shared Buffer](../02.03-数据库缓存/02.03.03-PostgreSQL-Shared-Buffer.md)
-- **02.03.04** [数据库缓存替换策略](../02.03-数据库缓存/02.03.04-数据库缓存替换策略.md)
-- **02.03.05** [MongoDB缓存机制](../02.03-数据库缓存/02.03.05-MongoDB缓存机制.md)
-- **02.03.06** [云数据库缓存架构](../02.03-数据库缓存/02.03.06-云数据库缓存架构.md) ✨ **前沿新增** - Aurora/PolarDB/Neon、存算分离、共享缓存池、Heat Map 预热
+- **02.03.01** [InnoDB Buffer Pool](./02.03-数据库缓存/02.03.01-InnoDB-Buffer-Pool.md)
+- **02.03.02** [MySQL Query Cache](./02.03-数据库缓存/02.03.02-MySQL-Query-Cache.md)
+- **02.03.03** [PostgreSQL Shared Buffer](./02.03-数据库缓存/02.03.03-PostgreSQL-Shared-Buffer.md)
+- **02.03.04** [数据库缓存替换策略](./02.03-数据库缓存/02.03.04-数据库缓存替换策略.md)
+- **02.03.05** [MongoDB缓存机制](./02.03-数据库缓存/02.03.05-MongoDB缓存机制.md)
+- **02.03.06** [云数据库缓存架构](./02.03-数据库缓存/02.03.06-云数据库缓存架构.md) ✨ **前沿新增** - Aurora/PolarDB/Neon、存算分离、共享缓存池、Heat Map 预热
 
 ### 02.04 现代内核缓存机制 ✨ **前沿新增**
 
-- **README** [现代内核缓存机制](../02.04-现代内核缓存机制/README.md) - MGLRU多代LRU、DAMON/DAMOS访问监控、folio抽象、内存分层与NUMA demotion（Linux 6.x-6.15）
-- **02.04.01** [新存储栈缓存技术](../02.04-现代内核缓存机制/02.04.01-新存储栈缓存技术.md) ✨ **前沿新增** - ZNS SSD、KVSSD、io_uring 高级特性、SPDK、Far Memory（Infiniswap/Leap/AIFM/Hermit）
+- **README** [现代内核缓存机制](./02.04-现代内核缓存机制/README.md) - MGLRU多代LRU、DAMON/DAMOS访问监控、folio抽象、内存分层与NUMA demotion（Linux 6.x-6.15）
+- **02.04.01** [新存储栈缓存技术](./02.04-现代内核缓存机制/02.04.01-新存储栈缓存技术.md) ✨ **前沿新增** - ZNS SSD、KVSSD、io_uring 高级特性、SPDK、Far Memory（Infiniswap/Leap/AIFM/Hermit）
 
 ### 02.05 系统级优化
 

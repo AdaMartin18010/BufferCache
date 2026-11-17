@@ -1,0 +1,72 @@
+# BufferCache 统一自我验证流水线
+# 门禁逻辑：python Testing/self_verify.py all --ci（失败非零退出即阻断）
+# 覆盖：文档代码块 / 语言标注 / 链接 / 导航统计 / TLA+ / trace 基准 / KV 模拟 / 运维静态检查 / 版本监控
+
+name: Self Verify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'AI_Skill/**'
+      - 'Testing/**'
+      - 'scripts/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - '.github/workflows/verify.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'AI_Skill/**'
+      - 'Testing/**'
+      - 'scripts/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - '.github/workflows/verify.yml'
+  workflow_dispatch:
+
+jobs:
+  self-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'   # TLA+ TLC（scripts/formal 的 jar）
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.x'   # TC-OPS-001 增强检查
+
+      - uses: azure/setup-helm@v4      # TC-OPS-001 增强检查
+
+      - name: 安装运维静态检查工具
+        run: |
+          pip install pyyaml
+          pip install ansible-core        # TC-OPS-001 ansible-playbook --syntax-check
+          # promtool（TC-OPS-002 规则检查）
+          PROM_VER=2.53.1
+          curl -sSL "https://github.com/prometheus/prometheus/releases/download/v${PROM_VER}/prometheus-${PROM_VER}.linux-amd64.tar.gz" | tar xz
+          sudo mv "prometheus-${PROM_VER}.linux-amd64"/promtool /usr/local/bin/
+          promtool --version
+
+      - name: 统一自我验证（全量）
+        run: python Testing/self_verify.py all --ci
+
+      - name: 上传报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-verify-report
+          path: Testing/output/
+          retention-days: 30

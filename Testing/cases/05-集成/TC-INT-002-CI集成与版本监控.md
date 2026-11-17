@@ -1,18 +1,14 @@
 # TC-INT-002 CI 集成与版本监控
 
-- **用例ID**：TC-INT-002 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`version` 子命令）；CI 接线人工
+- **用例ID**：TC-INT-002 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`version` 子命令）；CI 已接线（`.github/workflows/verify.yml`）
 - **目的**：CI 流水线接入 self_verify；版本监控与季度前沿评审机制化
-- **关联**：[scripts/version_monitor.py](../scripts/version_monitor.py)；[执行计划第三批](../../docs/06-扩展计划/国际前沿对齐与质量治理执行计划.md) §4.3
+- **关联**：[scripts/version_monitor.py](../scripts/version_monitor.py)；[执行计划第三批](../../docs/06-扩展计划/国际前沿对齐与质量治理执行计划.md) §4.3；[.github/workflows/verify.yml](../../../.github/workflows/verify.yml)
 
 ## 步骤
 
-### CI 接线（人工一次性 + 每次变更校验）
+### CI 接线（已完成 2026-11-17）
 
-```yaml
-# .github/workflows/verify.yml（项目接入时创建）示意
-- name: Self verify
-  run: python Testing/self_verify.py all --ci
-```
+`.github/workflows/verify.yml` 已创建：push/PR 触发 `python Testing/self_verify.py all --ci`（含 Java 跑 TLA+、terraform/helm/ansible/promtool 增强检查），报告以 artifact 保留 30 天。
 
 ### 版本监控（季度）
 

@@ -7,7 +7,9 @@
 ```text
 Testing/
 ├── README.md                  # 本文件
+├── 测试与验证执行计划.md       # 四层模型 + 用例执行矩阵 + hermes 手册 + 验收模板（总纲）
 ├── 自我验证修正机制.md         # 验证→诊断→纠正→修正→回归→登记 闭环机制
+├── local_verify_tasks.md      # 本地执行附页（Docker 环境待办任务卡，hermes 接续）
 ├── self_verify.py             # 统一自我验证入口（聚合执行 + 报告 + 修复指引）
 ├── fixtures/                  # 测试资产
 │   ├── redis-lab/             # 集群/灾备/混沌/监控 Docker 演练环境

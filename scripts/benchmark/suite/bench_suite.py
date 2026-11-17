@@ -17,6 +17,7 @@ BufferCache 标准化基准套件（TC-BENCH-005）
 
 import argparse
 import json
+import shlex
 import shutil
 import subprocess
 import sys
@@ -46,8 +47,8 @@ def redis_available(host="127.0.0.1", port=6379, timeout=2.0):
         return False
 
 
-def run_bench(name, args, host, port, password, requests):
-    cmd = ["redis-benchmark", "-h", host, "-p", str(port), "-n", str(requests), "-c", "50", "-q", "-t", "set,get"] + args
+def run_bench(name, args, host, port, password, requests, bench_cmd="redis-benchmark"):
+    cmd = shlex.split(bench_cmd) + ["-h", host, "-p", str(port), "-n", str(requests), "-c", "50", "-q", "-t", "set,get"] + args
     if password:
         cmd += ["-a", password, "--no-auth-warning"]
     try:
@@ -100,10 +101,12 @@ def main():
                     help=f"可选: {', '.join(SCENARIOS)}")
     ap.add_argument("--save-baseline", action="store_true", help="结果存为新基线")
     ap.add_argument("--compare", help="与指定基线 JSON 对比（默认对比内置基线）")
+    ap.add_argument("--bench-cmd", default="redis-benchmark",
+                    help='压测命令前缀（默认 redis-benchmark；容器内可用 "docker exec <容器> redis-benchmark"）')
     args = ap.parse_args()
 
-    if not shutil.which("redis-benchmark"):
-        print(json.dumps({"status": "SKIP", "reason": "未安装 redis-benchmark"}, ensure_ascii=False))
+    if not (shutil.which(shlex.split(args.bench_cmd)[0]) or args.bench_cmd.split()[0] == "docker"):
+        print(json.dumps({"status": "SKIP", "reason": f"未安装 {args.bench_cmd}"}, ensure_ascii=False))
         return 2
     if not redis_available(args.host, args.port):
         print(json.dumps({"status": "SKIP", "reason": f"{args.host}:{args.port} 无 Redis 实例"}, ensure_ascii=False))

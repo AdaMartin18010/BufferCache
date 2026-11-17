@@ -7,8 +7,12 @@
 ## 步骤
 
 ```bash
-python scripts/benchmark/suite/bench_suite.py --save-baseline   # 首次建立基线（换硬件/版本后重建）
-python scripts/benchmark/suite/bench_suite.py                    # 后续运行自动对比基线
+# 宿主已装 redis-benchmark：
+python scripts/benchmark/suite/bench_suite.py --host 127.0.0.1 --port 6379 --password lab-password --save-baseline
+# 宿主未装（容器内执行）：
+python scripts/benchmark/suite/bench_suite.py --host redis-m --port 6379 --password lab-password \
+    --bench-cmd "docker exec redis-lab-sentinel-redis-m-1 redis-benchmark" --save-baseline
+# 后续运行自动对比基线（不加 --save-baseline）
 python scripts/benchmark/suite/bench_suite.py --scenarios get_heavy_small   # 单场景
 ```
 

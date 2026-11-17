@@ -6,15 +6,18 @@
 
 ```text
 Testing/
-├── README.md                  # 本文件
-├── 测试与验证执行计划.md       # 四层模型 + 用例执行矩阵 + hermes 手册 + 验收模板（总纲）
+├── README.md                  # 体系导航
+├── 测试与验证执行计划.md       # 四层模型 + 用例执行矩阵 + hermes 手册 + 验收模板（执行总纲）
+├── 测试框架规范.md             # 检查项注册/脚本规范/用例模板/命名分组/统计口径（开发约定）
+├── 容器运行时适配规范.md       # docker/podman/k8s 探测与命令适配（环境抽象层）
+├── 用例全景统计.md             # 用例统计快照/覆盖度/待执行队列（月度刷新）
 ├── 自我验证修正机制.md         # 验证→诊断→纠正→修正→回归→登记 闭环机制
-├── local_verify_tasks.md      # 本地执行附页（Docker 环境待办任务卡，hermes 接续）
-├── self_verify.py             # 统一自我验证入口（聚合执行 + 报告 + 修复指引）
+├── local_verify_tasks.md      # 本地执行附页（Docker 环境待办任务卡）
+├── self_verify.py             # 统一自我验证入口
 ├── fixtures/                  # 测试资产
 │   ├── redis-lab/             # 集群/灾备/混沌/监控 Docker 演练环境
 │   └── traces/                # trace_benchmark 格式验证 fixture（通用/MSR）
-└── cases/                     # 测试用例库
+└── cases/                     # 测试用例库（31 用例，7 组）
     ├── 01-文档质量/
     │   ├── TC-DOC-001-文档代码块可运行性.md
     │   ├── TC-DOC-002-代码块语言标注真实性.md

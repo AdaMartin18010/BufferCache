@@ -69,6 +69,25 @@ def read(p):
         return ""
 
 
+def check_fingerprints():
+    """判定指纹双端校验（全局一致性规范 §3）：决策图网 §0.3 的结论必须在权威源文档中出现"""
+    FP = [
+        ("F1", "无持久化", "docs/03-Redis组件/03.02-持久化机制/03.02.06-持久化策略全局决策与成本模型.md"),
+        ("F2", "allkeys-lfu", "docs/03-Redis组件/03.04-内存管理/03.04.05-驱逐策略决策与近似误差.md"),
+        ("F3", "everysec", "docs/03-Redis组件/03.02-持久化机制/03.02.06-持久化策略全局决策与成本模型.md"),
+        ("F6", "版本号", "docs/04-架构设计/04.04-缓存问题与治理/04.04.08-缓存失效传播与一致性链路.md"),
+        ("F8", "限流兜底", "docs/07-运维与部署/07.09-弹性伸缩与自愈/07.09.04-分片级弹性伸缩与分区迁移.md"),
+        ("F11", "Kafka", "docs/04-架构设计/04.03-行业应用场景/04.03.19-Redis-Streams与消息队列边界.md"),
+        ("F13", "直连", "docs/04-架构设计/04.06-架构工具/04.06.05-缓存代理层架构对比.md"),
+        ("F17", "人工审批", "docs/07-运维与部署/07.09-弹性伸缩与自愈/07.09.04-分片级弹性伸缩与分区迁移.md"),
+    ]
+    drifts = []
+    for fid, needle, doc in FP:
+        if needle not in read(doc):
+            drifts.append(f"{fid}: 权威源缺判定结论 '{needle}' ({doc})")
+    return drifts
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fix-report", action="store_true")
@@ -96,6 +115,10 @@ def main():
             name = m.group(1)
             if name not in existing:
                 results.append((f"ref:{sk.parent.name}->{name}", "DRIFT", [name], []))
+
+    # 结构检查 2：判定指纹双端校验（决策图网结论 ↔ 权威源文档）
+    for d in check_fingerprints():
+        results.append((d.split(":")[0], "DRIFT", [d], []))
 
     drift = [r for r in results if r[1] == "DRIFT"]
     for cid, st, ms, md in results:

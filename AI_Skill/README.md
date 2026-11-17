@@ -70,6 +70,8 @@ AI_Skill/
 | 16 | distributed-architecture | 08 | Raft (ATC'14)、Redlock 争议、令牌桶 | ✅ |
 | 17 | cloud-native-cache | 04.03.16 ✨ | 云厂商默认 Valkey、K8s Operator 谱系、BuildKit 缓存 | ✅ |
 | 18 | elastic-selfhealing | 07.09 ✨ | HPA/VPA/KEDA/Karpenter、自愈五层、混沌工程 | ✅ |
+| 19 | cache-data-management | 01.03.05/03.01/03.02 ✨ | 分片数学、操作复杂度、序列化、持久化决策 | ✅ |
+| 20 | full-stack-analysis | 05 ✨ **新增** | 硬件→网络→控制流→数据流→算法→动态的纵向方法与工具链 | ✅ |
 
 **前沿更新时间**：2026-11（对齐执行计划第三批"季度前沿评审"）。
 

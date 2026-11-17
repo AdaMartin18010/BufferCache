@@ -112,7 +112,7 @@ python scripts/capacity_calculator.py      # 容量与成本估算（C 级参数
 python Testing/self_verify.py links --path <目录>
 
 # 5. 文档统计口径
-find docs -name "*.md" -not -path "*/archive/*" | wc -l   # 当前 249（含 STATUS 等）
+find docs -name "*.md" -not -path "*/archive/*" | wc -l   # 当前 259（含 STATUS 等）
 
 # 依赖：requirements.txt 锁定（requests/PyYAML）；文档构建依赖 requirements-dev.txt（mkdocs）
 ```

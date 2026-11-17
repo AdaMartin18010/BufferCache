@@ -370,7 +370,7 @@ def check_kv_sim() -> str:
 
 
 def find_yaml_blocks():
-    """从运维/监控文档提取 yaml 代码块"""
+    """从运维/监控/弹性自愈文档提取 yaml 代码块"""
     docs = [
         DOCS_DIR / "07-运维与部署",
         DOCS_DIR / "04-架构设计" / "04.04-缓存问题与治理" / "04.04.07-缓存监控指标体系.md",
@@ -547,6 +547,8 @@ CHECKS = [
           "cases/03-运维部署/TC-OPS-002-Prometheus规则与告警验证.md", check_ops),
     Check("TC-OPS-003", "缓存安全基线检查", "ops",
           "cases/03-运维部署/TC-OPS-003-缓存安全基线检查.md", check_ops),
+    Check("TC-OPS-004", "弹性伸缩与自愈配置验证", "ops",
+          "cases/03-运维部署/TC-OPS-004-弹性伸缩与自愈配置验证.md", check_ops),
     Check("TC-CLUS-001~004", "集群演练清单(人工)", "cluster",
           "cases/04-集群", check_cluster),
     Check("TC-INT-001", "全量回归(本子集组合)", "all",

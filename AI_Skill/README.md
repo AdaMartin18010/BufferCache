@@ -44,7 +44,8 @@ AI_Skill/
     ├── cache-security/                      # 04.02 ✨前沿：侧信道/CPDoS/防护体系
     ├── cache-operations-testing/            # 07+Testing：部署/监控/集群运维验证
     ├── distributed-architecture/            # 08：Raft/Paxos/2PC/TCC/Saga/锁/限流/配置
-    └── cloud-native-cache/                  # 04.03.16 ✨新增：云缓存服务/K8s Operator/Docker 构建缓存
+    ├── cloud-native-cache/                  # 04.03.16 ✨新增：云缓存服务/K8s Operator/Docker 构建缓存
+    └── elastic-selfhealing/                 # 07.09 ✨新增：伸缩(HPA/KEDA/Karpenter)/自愈/混沌工程
 ```
 
 ## 3. 技能清单与主题映射
@@ -68,6 +69,7 @@ AI_Skill/
 | 15 | cache-operations-testing | 07/Testing | Ansible/Terraform/Helm/Prometheus、Redis Cluster 验证 | ✅ |
 | 16 | distributed-architecture | 08 | Raft (ATC'14)、Redlock 争议、令牌桶 | ✅ |
 | 17 | cloud-native-cache | 04.03.16 ✨ | 云厂商默认 Valkey、K8s Operator 谱系、BuildKit 缓存 | ✅ |
+| 18 | elastic-selfhealing | 07.09 ✨ | HPA/VPA/KEDA/Karpenter、自愈五层、混沌工程 | ✅ |
 
 **前沿更新时间**：2026-11（对齐执行计划第三批"季度前沿评审"）。
 

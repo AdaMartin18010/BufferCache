@@ -1,0 +1,29 @@
+# Redis 主从 + Sentinel 演练环境（TC-CLUS-002/003）
+name: redis-lab-sentinel
+
+x-sentinel: &sentinel
+  image: redis:8-alpine
+  restart: unless-stopped
+  volumes:
+    - ./sentinel.conf:/tmp/sentinel-ro.conf:ro
+  command: sh -c "cp /tmp/sentinel-ro.conf /etc/sentinel.conf && redis-sentinel /etc/sentinel.conf"
+
+services:
+  redis-m:
+    image: redis:8-alpine
+    ports: ["6379:6379"]
+    command: redis-server --port 6379 --appendonly yes --min-replicas-to-write 1 --min-replicas-max-lag 10
+
+  redis-s1:
+    image: redis:8-alpine
+    ports: ["6380:6379"]
+    command: redis-server --port 6379 --appendonly yes --replicaof redis-m 6379
+
+  redis-s2:
+    image: redis:8-alpine
+    ports: ["6381:6379"]
+    command: redis-server --port 6379 --appendonly yes --replicaof redis-m 6379
+
+  sentinel-1: { <<: *sentinel, ports: ["26379:26379"] }
+  sentinel-2: { <<: *sentinel, ports: ["26380:26379"] }
+  sentinel-3: { <<: *sentinel, ports: ["26381:26379"] }

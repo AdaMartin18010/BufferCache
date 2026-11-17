@@ -12,6 +12,7 @@
 | 更新频率 | 稳定 | 随国际前沿季度评审滚动更新 |
 
 **边界规则**：
+
 - skill 不复制正文内容，只做摘要与导航；深入内容一律链接 `docs/` 具体文档。
 - skill 中每个事实性论断必须带出处（论文含会议/年份，在线资源含 URL），与 [质量门禁](../docs/06-扩展计划/国际前沿对齐与质量治理执行计划.md#6-质量门禁) 一致。
 - skill 不作为项目状态的记录场所，状态一律见 [STATUS.md](../docs/00-项目总览/STATUS.md)。
@@ -42,7 +43,8 @@ AI_Skill/
     ├── llm-kv-cache/                        # 04.03.15 ✨前沿：PagedAttention/RadixAttention/P-D分离/Mooncake
     ├── cache-security/                      # 04.02 ✨前沿：侧信道/CPDoS/防护体系
     ├── cache-operations-testing/            # 07+Testing：部署/监控/集群运维验证
-    └── distributed-architecture/            # 08：Raft/Paxos/2PC/TCC/Saga/锁/限流/配置
+    ├── distributed-architecture/            # 08：Raft/Paxos/2PC/TCC/Saga/锁/限流/配置
+    └── cloud-native-cache/                  # 04.03.16 ✨新增：云缓存服务/K8s Operator/Docker 构建缓存
 ```
 
 ## 3. 技能清单与主题映射
@@ -65,6 +67,7 @@ AI_Skill/
 | 14 | cache-security | 04.02 ✨ | Prime+Probe、CacheWarp (USENIX Sec'23)、CPDoS | ✅ |
 | 15 | cache-operations-testing | 07/Testing | Ansible/Terraform/Helm/Prometheus、Redis Cluster 验证 | ✅ |
 | 16 | distributed-architecture | 08 | Raft (ATC'14)、Redlock 争议、令牌桶 | ✅ |
+| 17 | cloud-native-cache | 04.03.16 ✨ | 云厂商默认 Valkey、K8s Operator 谱系、BuildKit 缓存 | ✅ |
 
 **前沿更新时间**：2026-11（对齐执行计划第三批"季度前沿评审"）。
 

@@ -13,14 +13,16 @@
 ```bash
 # 1. 记录基线
 redis-cli -p 6379 INFO replication > /tmp/before.txt
-# 2. 制造主库故障
-kill -STOP <主库PID>        # 或 DEBUG SLEEP 30
+# 2. 制造主库故障（用 docker pause 模拟"假死"：容器网络标识保留，DNS 可解析——
+#    生产语义；docker kill 会移除 DNS 条目使 resolve-hostnames 的 Sentinel 反复进入
+#    tilt 模式永不转移，该发现已登记 07.05.03）
+docker pause redis-lab-sentinel-redis-m
 # 3. 观察（另一终端）
 redis-cli -p 26379 SENTINEL masters
 redis-cli -p 26379 SENTINEL get-master-addr-by-name mymaster
 # 4. 恢复旧主
-kill -CONT <主库PID>
-redis-cli -p <旧主端口> SLAVEOF <新主IP> 6379
+docker unpause redis-lab-sentinel-redis-m
+redis-cli -p <旧主端口> REPLICAOF <新主IP> 6379   # 以从库身份归队
 ```
 
 ## 预期结果

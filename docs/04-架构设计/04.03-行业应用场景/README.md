@@ -171,6 +171,18 @@
     - Agent/多轮对话系统
     - 模型即服务（MaaS）平台
 
+- **04.03.16** 云原生缓存趋势与实践（云缓存 · Kubernetes · Docker）✅ **已完成** ✨ **新增**
+  - **文档**：[04.03.16-云原生缓存趋势与实践.md](./04.03.16-云原生缓存趋势与实践.md)
+  - **核心内容**：
+    - 云缓存服务格局：AWS/GCP 新集群默认 Valkey、Azure Managed Redis、serverless vs 节点式计费
+    - K8s 部署模式：裸 StatefulSet→Helm→Operator 谱系；KubeBlocks/OT-CONTAINER-KIT/Spotahome(已归档) 对比
+    - Docker 构建缓存：镜像层、BuildKit cache mount、CI 缓存与投毒防护
+    - 选型决策树与成本结构（2026）
+  - **典型场景**：
+    - Serverless 应用缓存（Upstash REST 模式）
+    - 金融合规自建（Operator + Valkey）
+    - 本地/CI 演练（Testing/fixtures/redis-lab）
+
 ## 3. 行业架构对比
 
 不同行业场景的缓存架构选择对比分析：

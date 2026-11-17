@@ -1,0 +1,25 @@
+# Redis Cluster 3主3从演练环境（TC-CLUS-001/004）
+# 镜像使用官方 redis:8-alpine；announce 用主机名保证容器网络内可达
+name: redis-lab-cluster
+
+x-node: &node
+  image: redis:8-alpine
+  restart: unless-stopped
+
+services:
+  redis-c1: { <<: *node, ports: ["7001:7000"], command: redis-server --port 7000 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-announce-ip redis-c1 --cluster-announce-port 7000 --cluster-announce-bus-port 17000 --appendonly yes }
+  redis-c2: { <<: *node, ports: ["7002:7000"], command: redis-server --port 7000 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-announce-ip redis-c2 --cluster-announce-port 7000 --cluster-announce-bus-port 17000 --appendonly yes }
+  redis-c3: { <<: *node, ports: ["7003:7000"], command: redis-server --port 7000 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-announce-ip redis-c3 --cluster-announce-port 7000 --cluster-announce-bus-port 17000 --appendonly yes }
+  redis-c4: { <<: *node, ports: ["7004:7000"], command: redis-server --port 7000 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-announce-ip redis-c4 --cluster-announce-port 7000 --cluster-announce-bus-port 17000 --appendonly yes }
+  redis-c5: { <<: *node, ports: ["7005:7000"], command: redis-server --port 7000 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-announce-ip redis-c5 --cluster-announce-port 7000 --cluster-announce-bus-port 17000 --appendonly yes }
+  redis-c6: { <<: *node, ports: ["7006:7000"], command: redis-server --port 7000 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-announce-ip redis-c6 --cluster-announce-port 7000 --cluster-announce-bus-port 17000 --appendonly yes }
+
+  cluster-init:
+    image: redis:8-alpine
+    depends_on: [redis-c1, redis-c2, redis-c3, redis-c4, redis-c5, redis-c6]
+    restart: "no"
+    command: >
+      sh -c "sleep 3 &&
+      redis-cli --cluster create redis-c1:7000 redis-c2:7000 redis-c3:7000
+      redis-c4:7000 redis-c5:7000 redis-c6:7000
+      --cluster-replicas 1 --cluster-yes"

@@ -100,8 +100,12 @@ python scripts/code_test_framework.py --test bash   # 报告 code_test_report_ba
 # 2. TLA+ 模型检查（Windows 直接运行；Linux/macOS 用 jar 命令）
 scripts/formal/run.bat
 
-# 3. Trace 驱动算法基准（合成 trace，约 10 秒）
+# 3. Trace 驱动算法基准（合成 trace，约 10 秒；--trace 支持公开 CSV 格式嗅探加载）
 python scripts/benchmark/trace_benchmark.py
+
+# 3b. 一致性/容量工具（C6/D8 可执行验证）
+python scripts/consistency_check.py        # Cache-Aside 并发不一致窗口三策略对比
+python scripts/capacity_calculator.py      # 容量与成本估算（C 级参数，压测校准）
 
 # 4. 链接自查（新文档提交前）
 #    用脚本检查新文档内全部 .md 相对链接可解析（参照历次验证做法）
@@ -109,6 +113,8 @@ python Testing/self_verify.py links --path <目录>
 
 # 5. 文档统计口径
 find docs -name "*.md" -not -path "*/archive/*" | wc -l   # 当前 249（含 STATUS 等）
+
+# 依赖：requirements.txt 锁定（requests/PyYAML）；文档构建依赖 requirements-dev.txt（mkdocs）
 ```
 
 ## 6. 当前进度（截至 2026-01，详见 STATUS.md）

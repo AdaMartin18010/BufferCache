@@ -7,6 +7,7 @@ scripts/formal/*_TTrace*.bin
 scripts/formal/out.txt
 scripts/formal/arc_out.txt
 Testing/output/
+Testing/fixtures/redis-lab/redis-m-data/
 
 # 编辑器
 .vscode/*

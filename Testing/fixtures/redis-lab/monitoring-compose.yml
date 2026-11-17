@@ -10,7 +10,7 @@ services:
     ports: ["19121:9121"]
     environment:
       REDIS_ADDR: "host.docker.internal:6379"
-      REDIS_PASSWORD: ""
+      REDIS_PASSWORD: "lab-password"
 
   prometheus:
     image: prom/prometheus:latest

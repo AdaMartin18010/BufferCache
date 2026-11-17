@@ -6,6 +6,10 @@ site_name: BufferCache 缓存知识体系
 site_description: 从硬件到算法、从理论到工程的 Buffer Cache 知识体系
 docs_dir: docs
 
+# 归档冻结文档不参与站点构建（链接冻结是历史约定，避免构建噪音）
+exclude_docs: |
+  archive/*
+
 theme:
   name: material
   language: zh

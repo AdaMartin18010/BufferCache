@@ -15,19 +15,19 @@ services:
     ports: ["6379:6379"]
     volumes:
       - ./redis-m-data:/data        # 数据卷：备份恢复演练（TC-CLUS-006）前提
-    command: redis-server --port 6379 --appendonly yes --min-replicas-to-write 1 --min-replicas-max-lag 10
+    command: redis-server --port 6379 --appendonly yes --requirepass lab-password --masterauth lab-password --min-replicas-to-write 1 --min-replicas-max-lag 10
 
   redis-s1:
     image: redis:8-alpine
     restart: unless-stopped
     ports: ["6380:6379"]
-    command: redis-server --port 6379 --appendonly yes --replicaof redis-m 6379
+    command: redis-server --port 6379 --appendonly yes --requirepass lab-password --masterauth lab-password --replicaof redis-m 6379
 
   redis-s2:
     image: redis:8-alpine
     restart: unless-stopped
     ports: ["6381:6379"]
-    command: redis-server --port 6379 --appendonly yes --replicaof redis-m 6379
+    command: redis-server --port 6379 --appendonly yes --requirepass lab-password --masterauth lab-password --replicaof redis-m 6379
 
   sentinel-1: { <<: *sentinel, ports: ["26379:26379"] }
   sentinel-2: { <<: *sentinel, ports: ["26380:26379"] }

@@ -39,11 +39,11 @@ description: 缓存安全（CPU侧信道/Spectre-Meltdown/TLB/CacheWarp/Web缓�
 
 | 知识点 | 项目文档 |
 | ------ | -------- |
-| 总览 | [04.02 README](../../docs/04-架构设计/04.02-缓存安全/README.md) |
+| 总览 | [04.02 README](../../../docs/04-架构设计/04.02-缓存安全/README.md) |
 | CPU 侧信道 | 同上（Flush+Reload/Prime+Probe 节） |
 | Web 层攻击 | 同上（投毒/CPDoS 节） |
 | 防护体系 | 同上（CAT/常数时间/分层防护节） |
-| 侧信道与缓存索引 | [02.02 README 关联](../../docs/02-系统实现/02.02-CPU缓存架构/) |
+| 侧信道与缓存索引 | [02.02 README 关联](../../../docs/02-系统实现/02.02-CPU缓存架构/) |
 
 ## 5. 常见任务工作流
 

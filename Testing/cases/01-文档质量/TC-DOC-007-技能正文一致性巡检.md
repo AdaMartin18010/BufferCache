@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-DOC-007 | **优先级**：P1 | **自动化**：self_verify 已覆盖（`docs` 组）
 - **目的**：事实断言清单驱动的双端比对——技能 §2/§3 的关键事实与 docs 正文逐条核对，发现"技能说 A、正文说 B"的静默漂移（第四道内容门禁的自动化执行器）
-- **关联**：[scripts/assertion_check.py](../../scripts/assertion_check.py)；[事实断言清单](../../docs/00-项目总览/事实断言清单.md)
+- **关联**：[scripts/assertion_check.py](../../../scripts/assertion_check.py)；[事实断言清单](../../../docs/00-项目总览/事实断言清单.md)
 
 ## 步骤
 

@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-BENCH-002 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`bench`）
 - **目的**：04.03.15 的可运行 KV 分页/前缀复用模拟可重复，登记值 ≈85.5% 前缀复用率不失效
-- **关联**：[04.03.15](../../docs/04-架构设计/04.03-行业应用场景/04.03.15-大模型推理缓存架构.md) 内嵌实验；[AI_Skill llm-kv-cache](../AI_Skill/skills/llm-kv-cache/SKILL.md)
+- **关联**：[04.03.15](../../../docs/04-架构设计/04.03-行业应用场景/04.03.15-大模型推理缓存架构.md) 内嵌实验；[AI_Skill llm-kv-cache](../../../AI_Skill/skills/llm-kv-cache/SKILL.md)
 
 ## 步骤
 

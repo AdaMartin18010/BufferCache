@@ -1,7 +1,7 @@
 # TC-DOC-002 代码块语言标注真实性
 
 - **用例ID**：TC-DOC-002 | **优先级**：P0 | **自动化**：self_verify 已覆盖（`docs`）
-- **目的**：禁止把非 Python 内容标注为 `python`（历史曾发生 4 处：Prometheus 查询须 `promql`、配置须 `ini`/`yaml`、伪代码须 `text`，见 [AGENTS.md](../AGENTS.md) §3.3）
+- **目的**：禁止把非 Python 内容标注为 `python`（历史曾发生 4 处：Prometheus 查询须 `promql`、配置须 `ini`/`yaml`、伪代码须 `text`，见 [AGENTS.md](../../../AGENTS.md) §3.3）
 - **关联**：docs/ 全库代码块
 
 ## 步骤

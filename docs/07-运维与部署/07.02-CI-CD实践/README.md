@@ -8,7 +8,7 @@
 
 ### 07.02.01 GitLab CI实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **GitLab CI配置**：.gitlab-ci.yml配置、Pipeline阶段
 - **配置验证**：Redis配置验证、语法检查
@@ -25,7 +25,7 @@
 
 ### 07.02.02 Jenkins实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Jenkins配置**：Jenkins安装、插件配置、Pipeline配置
 - **Pipeline脚本**：Jenkinsfile编写、Pipeline阶段
@@ -42,7 +42,7 @@
 
 ### 07.02.03 GitHub Actions实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **GitHub Actions配置**：Workflow配置、Actions使用
 - **自动化测试**：测试Workflow、测试报告

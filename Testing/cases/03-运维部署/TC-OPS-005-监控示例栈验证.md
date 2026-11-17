@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-OPS-005 | **优先级**：P1 | **自动化**：部分（exporter 指标自动验证；全栈运行需 Docker Hub 认证，人工执行）
 - **目的**：07.03 的告警规则与监控配置从纸面落到实载验证：redis_exporter 指标真实可达、规则文件结构合法、全栈（Prometheus+Grafana）可运行
-- **关联**：[07.03 监控告警](../../docs/07-运维与部署/07.03-监控告警/)；`Testing/fixtures/redis-lab/monitoring-compose.yml`
+- **关联**：[07.03 监控告警](../../../docs/07-运维与部署/07.03-监控告警/)；`Testing/fixtures/redis-lab/monitoring-compose.yml`
 
 ## 步骤
 

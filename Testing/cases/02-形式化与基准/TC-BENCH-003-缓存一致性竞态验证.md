@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-BENCH-003 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`consistency` 子命令）
 - **目的**：可执行验证 Cache-Aside 写路径在并发+删缓存失败下的不一致窗口，量化 TTL/延迟双删策略效果（04.01.01 文档结论的执行证据）
-- **关联**：[scripts/consistency_check.py](../../scripts/consistency_check.py)；[04.01.01 Cache-Aside](../../docs/04-架构设计/04.01-缓存架构模式/04.01.01-Cache-Aside旁路缓存.md)
+- **关联**：[scripts/consistency_check.py](../../../scripts/consistency_check.py)；[04.01.01 Cache-Aside](../../../docs/04-架构设计/04.01-缓存架构模式/04.01.01-Cache-Aside旁路缓存.md)
 
 ## 步骤
 

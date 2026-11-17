@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-BENCH-004 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`bench` 组）
 - **目的**：scripts/capacity_calculator.py 可运行、输出结构完整、C 级假设显式声明（05.06/07.05.04 公式的可执行化验证）
-- **关联**：[scripts/capacity_calculator.py](../../scripts/capacity_calculator.py)；[07.05.04 §3 实测基线](../../docs/07-运维与部署/07.05-集群管理/07.05.04-集群容量规划.md)
+- **关联**：[scripts/capacity_calculator.py](../../../scripts/capacity_calculator.py)；[07.05.04 §3 实测基线](../../../docs/07-运维与部署/07.05-集群管理/07.05.04-集群容量规划.md)
 
 ## 步骤
 

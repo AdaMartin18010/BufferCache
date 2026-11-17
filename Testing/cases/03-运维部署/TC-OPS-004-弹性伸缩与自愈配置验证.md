@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-OPS-004 | **优先级**：P1 | **自动化**：self_verify 已覆盖（`ops`，随 07.09 文档 yaml 块扫描）
 - **目的**：07.09 弹性伸缩与自愈文档中的 HPA/KEDA/探针/Chaos Mesh 配置语法合法、关键防护字段齐全
-- **关联**：[07.09 弹性伸缩与自愈](../../docs/07-运维与部署/07.09-弹性伸缩与自愈/)；[AI_Skill elastic-selfhealing](../../AI_Skill/skills/elastic-selfhealing/SKILL.md)
+- **关联**：[07.09 弹性伸缩与自愈](../../../docs/07-运维与部署/07.09-弹性伸缩与自愈/)；[AI_Skill elastic-selfhealing](../../../AI_Skill/skills/elastic-selfhealing/SKILL.md)
 
 ## 步骤
 

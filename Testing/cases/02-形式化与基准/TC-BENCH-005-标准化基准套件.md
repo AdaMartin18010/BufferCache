@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-BENCH-005 | **优先级**：P1 | **自动化**：部分（脚本自动；需本地 Redis 实例，无则 SKIP）
 - **目的**：把单发 redis-benchmark 升级为场景化矩阵（读写比×对象大小）+ 基线入库 + **回归检测**（与历史基线偏差 >15% 告警）
-- **关联**：[scripts/benchmark/suite/bench_suite.py](../../scripts/benchmark/suite/bench_suite.py)；[07.05.04 §3 实测基线](../../docs/07-运维与部署/07.05-集群管理/07.05.04-集群容量规划.md)
+- **关联**：[scripts/benchmark/suite/bench_suite.py](../../../scripts/benchmark/suite/bench_suite.py)；[07.05.04 §3 实测基线](../../../docs/07-运维与部署/07.05-集群管理/07.05.04-集群容量规划.md)
 
 ## 步骤
 

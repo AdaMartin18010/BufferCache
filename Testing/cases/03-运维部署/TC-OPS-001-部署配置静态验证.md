@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-OPS-001 | **优先级**：P1 | **自动化**：self_verify 已覆盖（`ops`，环境缺工具时跳过并标注）
 - **目的**：docs/07 中的 Ansible/Terraform/Helm/compose 配置在变更前后均通过静态验证，坏配置不进主干
-- **关联**：[07.01](../../docs/07-运维与部署/07.01-部署自动化/)；[AI_Skill cache-operations-testing](../AI_Skill/skills/cache-operations-testing/SKILL.md) §3
+- **关联**：[07.01](../../../docs/07-运维与部署/07.01-部署自动化/)；[AI_Skill cache-operations-testing](../../../AI_Skill/skills/cache-operations-testing/SKILL.md) §3
 
 ## 前置条件
 

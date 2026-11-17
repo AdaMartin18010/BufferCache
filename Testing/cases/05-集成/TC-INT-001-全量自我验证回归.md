@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-INT-001 | **优先级**：P0 | **自动化**：self_verify 已覆盖（`all`）
 - **目的**：任何变更提交前，项目全量验证无回归（AGENTS.md §4.3 DoD 的验证底座）
-- **关联**：[自我验证修正机制](../自我验证修正机制.md)；[Testing/README](../README.md) §3
+- **关联**：[自我验证修正机制](../../../Testing/自我验证修正机制.md)；[Testing/README](../../../README.md) §3
 
 ## 步骤
 

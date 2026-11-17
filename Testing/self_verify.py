@@ -187,10 +187,11 @@ LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 
 
 def check_links(base_arg: str) -> str:
-    """TC-DOC-003: 相对链接完整性"""
-    base = (PROJECT_ROOT / base_arg).resolve() if base_arg else None
-    if base is None:
-        base = DOCS_DIR
+    """TC-DOC-003: 相对链接完整性（默认全库：docs+AI_Skill+Testing+根目录）"""
+    if base_arg:
+        base = (PROJECT_ROOT / base_arg).resolve()
+    else:
+        base = PROJECT_ROOT.resolve()
     if not str(base).startswith(str(PROJECT_ROOT.resolve())):
         return "FAIL\n--path 必须位于项目内"
     targets = [base] if base.exists() else None
@@ -649,6 +650,34 @@ def check_assertions() -> str:
     return "PASS\n" + "\n".join(ln for ln in out.splitlines() if ln.startswith("[PASS]"))
 
 
+_GOV_CACHE = {}
+
+
+def check_governance() -> str:
+    """TC-BENCH-006/007: 治理模拟 + KV 驱逐对比（两个用例共享一次运行）"""
+    if "result" in _GOV_CACHE:
+        return _GOV_CACHE["result"]
+    parts = []
+    for script, cases in (("governance_sim.py", ["penetrate", "breakdown"]),
+                          ("kv_evict_bench.py", ["LRU", "SIEVE"])):
+        path = PROJECT_ROOT / "scripts" / script
+        if not path.exists():
+            _GOV_CACHE["result"] = f"SKIP\n{script} 不存在"
+            return _GOV_CACHE["result"]
+        rc, out = run_cmd([sys.executable, str(path)], timeout=240)
+        if rc != 0:
+            _GOV_CACHE["result"] = f"FAIL\n{script} 退出码 {rc}：\n{out[-300:]}"
+            return _GOV_CACHE["result"]
+        missing = [c for c in cases if c not in out]
+        if missing:
+            _GOV_CACHE["result"] = f"FAIL\n{script} 输出缺少场景 {missing}\n{out[-300:]}"
+            return _GOV_CACHE["result"]
+        parts.append(f"[{script}]\n" + "\n".join(out.strip().splitlines()[-8:]))
+    result = "PASS\n治理模拟与 KV 驱逐对比输出正常：\n\n" + "\n\n".join(parts)
+    _GOV_CACHE["result"] = result
+    return result
+
+
 def check_version() -> str:
     """TC-INT-002: 版本监控"""
     script = PROJECT_ROOT / "scripts" / "version_monitor.py"
@@ -702,6 +731,10 @@ CHECKS = [
           "cases/01-文档质量/TC-DOC-006-文档站点构建检查.md", check_mkdocs, slow=True),
     Check("TC-DOC-007", "技能-正文一致性巡检", "docs",
           "cases/01-文档质量/TC-DOC-007-技能正文一致性巡检.md", check_assertions),
+    Check("TC-BENCH-006", "治理策略模拟(穿透/雪崩/击穿)", "governance",
+          "cases/02-形式化与基准/TC-BENCH-006-治理策略模拟验证.md", check_governance, slow=True),
+    Check("TC-BENCH-007", "KV驱逐策略对比(LRU/FIFO/SIEVE)", "governance",
+          "cases/02-形式化与基准/TC-BENCH-007-KV驱逐策略对比实验.md", check_governance, slow=True),
     Check("TC-CLUS-001~004", "集群演练清单(人工)", "cluster",
           "cases/04-集群", check_cluster),
     Check("TC-INT-001", "全量回归(本子集组合)", "all",
@@ -713,7 +746,7 @@ CHECKS = [
 
 GROUPS = {
     "all": ["docs", "links", "structure", "formal", "bench", "ops", "version",
-            "consistency", "lab", "security"],
+            "consistency", "lab", "security", "governance"],
     "docs": ["docs", "links", "structure"],
     "structure": ["structure"],
     "links": ["links"],
@@ -722,6 +755,7 @@ GROUPS = {
     "consistency": ["consistency"],
     "lab": ["lab"],
     "security": ["security"],
+    "governance": ["governance"],
     "ops": ["ops"],
     "cluster": ["cluster"],
     "version": ["version"],

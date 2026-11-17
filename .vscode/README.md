@@ -61,7 +61,7 @@ Markdownlint 规则配置（项目根目录）：
 ## 🎯 快捷键
 
 | 功能 | Windows/Linux | Mac |
-|------|--------------|-----|
+| ------ | -------------- | ----- |
 | 保存并格式化 | `Ctrl+S` | `Cmd+S` |
 | 格式化文档 | `Shift+Alt+F` | `Shift+Option+F` |
 | 修复所有错误 | `Ctrl+Shift+P` → "Fix all" | `Cmd+Shift+P` → "Fix all" |

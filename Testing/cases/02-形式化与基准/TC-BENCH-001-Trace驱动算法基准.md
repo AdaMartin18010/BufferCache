@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-BENCH-001 | **优先级**：P1 | **自动化**：self_verify 已覆盖（`bench`）
 - **目的**：LRU/LFU/S3-FIFO 在合成 Zipf/扫描 trace 与公开格式 CSV 上的命中率回归基线不失效
-- **关联**：[scripts/benchmark/trace_benchmark.py](../../scripts/benchmark/trace_benchmark.py)；[01.05.04](../../docs/01-理论基础/01.05-算法对比与决策/01.05.04-算法性能基准测试.md) §6.0；fixture `Testing/fixtures/traces/`
+- **关联**：[scripts/benchmark/trace_benchmark.py](../../../scripts/benchmark/trace_benchmark.py)；[01.05.04](../../../docs/01-理论基础/01.05-算法对比与决策/01.05.04-算法性能基准测试.md) §6.0；fixture `Testing/fixtures/traces/`
 
 ## 步骤
 

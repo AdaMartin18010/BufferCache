@@ -55,6 +55,10 @@ CHECKS = [
      ["docs/01-理论基础/01.03-分布式缓存算法/01.03.01-一致性哈希原理.md"], ["1997"]),
     ("D13", "AI_Skill/skills/cpu-cache-architecture/SKILL.md", ["64"],
      ["docs/02-系统实现/02.02-CPU缓存架构/02.02.03-Cache-Line对齐优化.md"], ["64"]),
+    ("D14", "AI_Skill/skills/llm-kv-cache/SKILL.md", ["RadixAttention"],
+     ["docs/04-架构设计/04.03-行业应用场景/04.03.15-大模型推理缓存架构.md"], ["RadixAttention"]),
+    ("D15", "AI_Skill/skills/redis-data-structures/SKILL.md", ["Stream"],
+     ["docs/04-架构设计/04.03-行业应用场景/04.03.19-Redis-Streams与消息队列边界.md"], ["XAUTOCLAIM"]),
 ]
 
 

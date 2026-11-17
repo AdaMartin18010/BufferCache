@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-DOC-006 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`docs` 组，无 mkdocs 自动 SKIP）
 - **目的**：验证 250+ 篇 docs/ 文档作为 MkDocs 站点可构建（--strict 模式），兑现文档自动化维护机制.md 的站点化设想
-- **关联**：mkdocs.yml；[文档自动化维护机制](../../docs/00-项目总览/文档自动化维护机制.md)；requirements-dev.txt
+- **关联**：mkdocs.yml；[文档自动化维护机制](../../../docs/00-项目总览/文档自动化维护机制.md)；requirements-dev.txt
 
 ## 步骤
 

@@ -2,7 +2,7 @@
 
 - **用例ID**：TC-STAT-001 | **优先级**：P2 | **自动化**：self_verify 已覆盖（`structure`）
 - **目的**：文档统计口径唯一且与实际目录一致（AGENTS.md §5-5；STATUS.md 计数）
-- **关联**：[STATUS.md](../docs/00-项目总览/STATUS.md)；[docs/INDEX.md](../docs/INDEX.md)
+- **关联**：[STATUS.md](../../../docs/00-项目总览/STATUS.md)；[docs/INDEX.md](../../../docs/INDEX.md)
 
 ## 步骤
 

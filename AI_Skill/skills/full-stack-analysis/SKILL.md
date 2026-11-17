@@ -11,7 +11,7 @@ description: 缓存系统全栈分析（硬件→网络→控制流→数据流�
 
 - **覆盖**：硬件层（CPU/NUMA/SSD/网卡 DMA）、网络层（TCP/epoll/零拷贝/io_uring）、控制流（事件循环/状态机/BIO）、数据流（请求-响应/持久化/复制/延迟分解）、算法层（近似 LRU/LFU/哈希/压缩实现）、动态特征（延迟分布/Little 定律/故障传播/抖动/边界估算）、瓶颈分析。
 - **适用**：性能问题的分层定位（从哪个层开始查）；延迟/吞吐账的测算；容量与瓶颈评估。
-- **不适用**：具体算法选型（→ cache-algorithms-*）；运维操作（→ cache-operations-testing）。
+- **不适用**：具体算法选型（→ cache-algorithms-fundamentals / cache-algorithms-advanced）；运维操作（→ cache-operations-testing）。
 
 ## 2. 核心要点
 

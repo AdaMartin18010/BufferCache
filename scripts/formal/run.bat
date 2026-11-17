@@ -12,4 +12,9 @@ java -XX:+UseParallelGC -jar tla2tools.jar -nowarning -config ARC.cfg ARC.tla
 if errorlevel 1 (echo ARC: FAILED & exit /b 1) else (echo ARC: PASSED)
 
 echo.
+echo ===== Running TLC on SIEVE =====
+java -XX:+UseParallelGC -jar tla2tools.jar -nowarning -config SIEVE.cfg SIEVE.tla
+if errorlevel 1 (echo SIEVE: FAILED & exit /b 1) else (echo SIEVE: PASSED)
+
+echo.
 echo All model checks PASSED

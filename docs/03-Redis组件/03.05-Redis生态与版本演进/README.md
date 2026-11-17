@@ -17,7 +17,7 @@
     - [4.2 Redict（LGPL 独立分支）](#42-redictlgpl-独立分支)
     - [4.3 KeyDB（多线程路线）](#43-keydb多线程路线)
     - [4.4 Dragonfly（C++ 重写）](#44-dragonflyc-重写)
-    - [4.5 Garnet（微软 RESP 实现）](#45-garnet微软-resp-实现)
+    - [4.5 Garnet（微软 RESP 实现）✨ **前沿更新（2026-11）**](#45-garnet微软-resp-实现-前沿更新2026-11)
   - [5. 生态对比矩阵](#5-生态对比矩阵)
   - [6. 选型决策指南](#6-选型决策指南)
   - [7. 对本项目文档的影响](#7-对本项目文档的影响)
@@ -122,7 +122,10 @@ Redis 8.0 将**向量集（Vector Set）**做进内核：`VADD`、`VSIM` 等命�
 - **性能**：宣称高吞吐（多核线性扩展），适合纯缓存大 keyspace 场景
 - **注意**：API 兼容性非 100%（模块、部分命令与 Lua 语义差异需验证）
 
-### 4.5 Garnet（微软 RESP 实现）
+### 4.5 Garnet（微软 RESP 实现）✨ **前沿更新（2026-11）**
+
+> Garnet 已由工程作品升级为顶会论文：Chandramouli et al., "Garnet: A Next-Generation Cache-Store for Accelerating Applications and Services", **VLDB 2026**；NuGet 最新 2.2.0。从数据库视角重构缓存存储（大于内存的缓存 / AOF / 检查点三层存储用途 + IDevice 抽象），RESP 协议兼容。
+
 
 - **定位**：微软研究院 C#/.NET 实现的 RESP 协议缓存存储
 - **特点**：与 Azure 生态集成、分片集群支持、Lua 兼容层

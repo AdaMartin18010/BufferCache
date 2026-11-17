@@ -63,11 +63,11 @@ description: 大模型推理缓存（PagedAttention/RadixAttention/KV分层卸�
 
 ## 6. 国际前沿对齐（截至 2026-11）
 
-- vLLM V1 成熟，KV Connector 生态（Mooncake/NIXL/LMCache）并存；vLLM v0.21 引入 HMA（heterogeneous memory attention）方向（2026）。
-- SGLang EPD 三段解耦（2025-12-23）与 HiCache 分层（CPU+MoE 专家缓存）持续推进。
-- Mooncake 加入 PyTorch 生态（2026-02-12）；Kimi-K2 1T 模型权重 RDMA P2P 更新 7× 加速（2026-04-29）。
-- libCacheSim PrefixSim（2026-11）发布，LLM 驱逐策略对比标准化。
-- 开放缺口：Mooncake/llm-d 部署实践第二篇（项目执行计划仍开放）。
+- 分层与压缩方向成型：**IMPRESS（FAST'25，重要性多层级前缀存储）**、**HACK（SIGCOMM'25，P/D 间 KV 压缩直算免反量化）**、**InstAttention（HPCA'25，KV 下沉计算存储设备）**——04.03.15 §8 分层判据的后续工作。
+- 特征刻画与调度：**KVCache in the Wild（ATC'25，大规模云商 KV 复用特征）**为复用率基线提供真实数据参照；Preble（ICLR'25）分布式提示调度。
+- 服务形态新进展：**ECHO（OSDI'26，稀疏注意力原生服务 + KV 卸载突破 HBM 限制）**、**LLM-42（SOSP'26，decode-verify-rollback 确定性推理）**——可观测性与正确性两个维度的新要求（04.03.18 的 burn_alert 与正确性类 SLO 可挂接）。
+- vLLM v0.21.0 自动前缀缓存驱逐策略文档化（2026-07，04.03.18 §5 实操锚点）。
+- libCacheSim PrefixSim（2026-11）支持 40+ 策略 LLM trace 对比（评估标准台架）。
 
 ## 7. 验证命令
 

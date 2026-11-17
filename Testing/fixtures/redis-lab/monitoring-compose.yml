@@ -1,0 +1,28 @@
+# 监控示例栈（TC-OPS-005）：Prometheus + redis_exporter + Grafana
+# 依赖：sentinel-compose 环境（redis 映射宿主 6379/6380/6381 与 cluster 7001-7006）
+# 访问：Prometheus http://localhost:9090  Grafana http://localhost:3000(admin/admin)
+name: redis-lab-monitoring
+
+services:
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    restart: unless-stopped
+    ports: ["19121:9121"]
+    environment:
+      REDIS_ADDR: "host.docker.internal:6379"
+      REDIS_PASSWORD: ""
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin

@@ -1,0 +1,34 @@
+# redis-lab 告警规则（从 docs/07.03.03 核心规则提取实载；阈值按演练环境缩小）
+groups:
+  - name: redis-lab-alerts
+    rules:
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 15s
+        labels: { severity: critical }
+        annotations:
+          summary: "Redis 实例不可达"
+          description: "{{ $labels.instance }} redis_up==0 持续 15s"
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.5
+        for: 30s
+        labels: { severity: warning }
+        annotations:
+          summary: "Redis 内存水位超 50%（演练阈值）"
+          description: "{{ $labels.instance }} 内存使用 {{ $value | humanizePercentage }}"
+      - alert: RedisHitRateLow
+        expr: |
+          rate(redis_keyspace_hits_total[1m])
+          / (rate(redis_keyspace_hits_total[1m]) + rate(redis_keyspace_misses_total[1m])) < 0.8
+        for: 1m
+        labels: { severity: warning }
+        annotations:
+          summary: "Redis 命中率低于 80%（演练阈值）"
+          description: "{{ $labels.instance }} 命中率 {{ $value | humanizePercentage }}"
+      - alert: RedisReplicationBroken
+        expr: redis_connected_slaves == 0
+        for: 30s
+        labels: { severity: critical }
+        annotations:
+          summary: "Redis 主库无存活从库（min-replicas 将拒写）"
+          description: "{{ $labels.instance }} connected_slaves=0"

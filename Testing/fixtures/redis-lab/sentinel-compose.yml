@@ -11,19 +11,34 @@ x-sentinel: &sentinel
 services:
   redis-m:
     image: redis:8-alpine
+    restart: unless-stopped
     ports: ["6379:6379"]
+    volumes:
+      - ./redis-m-data:/data        # 数据卷：备份恢复演练（TC-CLUS-006）前提
     command: redis-server --port 6379 --appendonly yes --min-replicas-to-write 1 --min-replicas-max-lag 10
 
   redis-s1:
     image: redis:8-alpine
+    restart: unless-stopped
     ports: ["6380:6379"]
     command: redis-server --port 6379 --appendonly yes --replicaof redis-m 6379
 
   redis-s2:
     image: redis:8-alpine
+    restart: unless-stopped
     ports: ["6381:6379"]
     command: redis-server --port 6379 --appendonly yes --replicaof redis-m 6379
 
   sentinel-1: { <<: *sentinel, ports: ["26379:26379"] }
   sentinel-2: { <<: *sentinel, ports: ["26380:26379"] }
   sentinel-3: { <<: *sentinel, ports: ["26381:26379"] }
+
+  # 混沌注入代理（TC-CLUS-007）：客户端连宿主 36379 = redis-m 的故障注入代理
+  # 控制面 API: http://localhost:8474 （创建 proxy / 加减 toxic）
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.12.0
+    restart: unless-stopped
+    ports: ["36379:36379", "8474:8474"]
+    depends_on: [redis-m]
+    command: -host 0.0.0.0
+    # 注: proxy 定义需经 API 创建（见 TC-CLUS-007 步骤 1），compose 不内嵌配置以保持镜像通用

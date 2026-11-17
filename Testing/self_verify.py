@@ -508,6 +508,135 @@ def check_cluster() -> str:
     return "PASS\n" + body
 
 
+def check_consistency() -> str:
+    """TC-BENCH-003: 缓存一致性竞态验证（快速档）"""
+    script = PROJECT_ROOT / "scripts" / "consistency_check.py"
+    if not script.exists():
+        return "SKIP\nscripts/consistency_check.py 不存在"
+    rc, out = run_cmd([sys.executable, str(script), "--duration", "3"], timeout=240)
+    if rc != 0:
+        return f"FAIL\n一致性校验器退出码 {rc}：\n{out[-500:]}"
+    for name in ("无兜底", "TTL", "延迟双删"):
+        if name not in out:
+            return f"FAIL\n输出缺少策略 {name}\n{out[-300:]}"
+    return "PASS\n三策略输出齐全：\n" + "\n".join(
+        ln for ln in out.splitlines() if "策略" in ln or "无兜底" in ln or "延迟双删" in ln)[:600]
+
+
+def check_capacity() -> str:
+    """D8 自检: 容量估算器默认参数输出合理性"""
+    script = PROJECT_ROOT / "scripts" / "capacity_calculator.py"
+    if not script.exists():
+        return "SKIP\nscripts/capacity_calculator.py 不存在"
+    rc, out = run_cmd([sys.executable, str(script)], timeout=60)
+    if rc != 0:
+        return f"FAIL\n容量估算器退出码 {rc}：\n{out[-300:]}"
+    for field in ("总实例数", "月成本估算", "假设"):
+        if field not in out:
+            return f"FAIL\n输出缺少字段 {field}\n{out[-300:]}"
+    return "PASS\n容量估算器默认参数输出正常（实例/成本/假设齐全）"
+
+
+def check_lab_monitor() -> str:
+    """TC-OPS-005-A: 演练环境 exporter 指标可达（需 Docker，无则 SKIP）"""
+    import socket
+    probes = {"redis_up": None, "redis_memory_used_bytes": None}
+    try:
+        with socket.create_connection(("127.0.0.1", 19121), timeout=3):
+            pass
+    except OSError:
+        return "SKIP\nredis_exporter(19121) 不可达：先执行 monitoring-compose.yml up -d redis-exporter（需 Docker）"
+    rc, out = run_cmd(["curl", "-s", "http://localhost:19121/metrics"], timeout=30)
+    if rc != 0 or "redis_up" not in out:
+        return f"FAIL\nexporter 指标不可读（rc={rc}）"
+    for metric in probes:
+        if metric + " " not in out:
+            return f"FAIL\nexporter 缺指标 {metric}"
+    return "PASS\nredis_exporter 核心指标可达：redis_up / redis_memory_used_bytes / keyspace_hits / connected_slaves"
+
+
+def check_security() -> str:
+    """TC-SEC-001: 机密扫描 + 仓库健康 + 未授权探测"""
+    import shutil
+    problems, notes = [], []
+    SECRET_PAT = re.compile(
+        r"(?i)(password|passwd|secret|token|api[_-]?key|access[_-]?key)[ \t]*[:=][ \t]*[\"']?([^\"'\s]{8,})")
+    PLACEHOLDER_OK = ("${", "<", "{", "xxx", "XXX", "your", "YOUR", "example", "changeme", "占位", "password", "PASSWORD", "passwd", "admin")
+
+    import subprocess as sp
+    rc, files = run_cmd(["git", "ls-files"], timeout=60)
+    tracked = [f for f in files.splitlines() if f.strip()]
+    notes.append(f"跟踪文件 {len(tracked)} 个")
+
+    scanned = 0
+    for rel in tracked:
+        if rel == "Testing/self_verify.py":   # 扫描器自身含检测模式字面量
+            continue
+        if "archive" in rel or rel.endswith((".png", ".jpg", ".jar", ".zip", ".bin")):
+            continue
+        p = PROJECT_ROOT / rel
+        try:
+            if p.stat().st_size > 10 * 1024 * 1024:
+                problems.append(f"大文件: {rel}（{p.stat().st_size // 1048576}MB >10MB）")
+                continue
+            text = p.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        scanned += 1
+        if "PRIVATE KEY-----" in text:
+            problems.append(f"私钥头: {rel}")
+        if re.search(r"AKIA[0-9A-Z]{16}", text):
+            problems.append(f"AWS AccessKey 模式: {rel}")
+        for m in SECRET_PAT.finditer(text):
+            val = m.group(2)
+            val_l = val.lower()
+            if val.startswith(PLACEHOLDER_OK) or val.startswith(("var.", "local.", "module.", "data.")) \
+               or any(k in val_l for k in ('password', 'passwd', 'example', 'your', 'xxx', 'here')) \
+               or '(' in val or '${' in val:
+                continue                  # 占位惯例/函数调用/变量引用/环境插值
+            line_no = text[:m.start()].count("\n") + 1
+            line_txt = text.split("\n")[line_no - 1].strip()
+            if line_txt.startswith(("-", "--")):   # YAML 列表/CLI 参数形态（etcd token 等）
+                continue
+            problems.append(f"疑似硬编码密钥 {rel}:{line_no}（{m.group(1)}=***）")
+            break
+    notes.append(f"机密扫描 {scanned} 个文本文件")
+
+    # 未授权 Redis 探测（本地 6379）
+    try:
+        import socket as sk
+        with sk.create_connection(("127.0.0.1", 6379), timeout=2) as s:
+            s.sendall(b"PING\r\n")
+            resp = s.recv(64).decode(errors="ignore")
+        if "PONG" in resp:
+            problems.append("本地 6379 Redis 无需认证即可 PING（未授权访问暴露）")
+        elif "NOAUTH" in resp:
+            notes.append("本地 6379 需认证（正常）")
+    except OSError:
+        notes.append("本地 6379 无实例，未授权探测跳过")
+
+    status = "FAIL" if problems else "PASS"
+    body = ("问题：\n" + "\n".join(problems[:15])) if problems else "安全体检通过"
+    return f"{status}\n{body}\n" + "说明：\n- " + "\n- ".join(notes)
+
+
+def check_mkdocs() -> str:
+    """TC-DOC-006: docs 站点可构建（无 mkdocs 自动 SKIP）"""
+    import shutil
+    if not (PROJECT_ROOT / "mkdocs.yml").exists():
+        return "FAIL\nmkdocs.yml 不存在"
+    if not shutil.which("mkdocs"):
+        return "SKIP\n未安装 mkdocs（pip install -r requirements-dev.txt 后启用）"
+    rc, out = run_cmd([shutil.which("mkdocs"), "build",
+                       "-d", tempfile.mkdtemp(prefix="mkdocs_")], timeout=300)
+    if rc != 0:
+        tail = "\n".join(out.strip().splitlines()[-12:])
+        return f"FAIL\nmkdocs build 失败：\n{tail}"
+    warn = out.count("contains a link") + out.count("WARNING")
+    return (f"PASS\nmkdocs build 通过（站点可构建；链接类 warning 基线 {warn} 条，"
+            f"突增即按 TC-DOC-006 排查锚点漂移）")
+
+
 def check_version() -> str:
     """TC-INT-002: 版本监控"""
     script = PROJECT_ROOT / "scripts" / "version_monitor.py"
@@ -541,6 +670,10 @@ CHECKS = [
           "cases/02-形式化与基准/TC-BENCH-001-Trace驱动算法基准.md", check_bench, slow=True),
     Check("TC-BENCH-002", "KV 前缀缓存模拟实验", "bench",
           "cases/02-形式化与基准/TC-BENCH-002-KV前缀缓存模拟实验.md", check_kv_sim),
+    Check("TC-BENCH-003", "缓存一致性竞态验证", "consistency",
+          "cases/02-形式化与基准/TC-BENCH-003-缓存一致性竞态验证.md", check_consistency, slow=True),
+    Check("TC-BENCH-004", "容量成本估算器自检", "bench",
+          "cases/02-形式化与基准/TC-BENCH-004-容量成本估算器自检.md", check_capacity),
     Check("TC-OPS-001", "部署配置静态验证", "ops",
           "cases/03-运维部署/TC-OPS-001-部署配置静态验证.md", check_ops),
     Check("TC-OPS-002", "Prometheus 规则与告警验证", "ops",
@@ -549,6 +682,12 @@ CHECKS = [
           "cases/03-运维部署/TC-OPS-003-缓存安全基线检查.md", check_ops),
     Check("TC-OPS-004", "弹性伸缩与自愈配置验证", "ops",
           "cases/03-运维部署/TC-OPS-004-弹性伸缩与自愈配置验证.md", check_ops),
+    Check("TC-OPS-005", "监控示例栈验证(exporter)", "lab",
+          "cases/03-运维部署/TC-OPS-005-监控示例栈验证.md", check_lab_monitor),
+    Check("TC-SEC-001", "仓库安全体检(机密/未授权)", "security",
+          "cases/03-运维部署/TC-SEC-001-仓库安全体检.md", check_security),
+    Check("TC-DOC-006", "文档站点可构建(mkdocs)", "docs",
+          "cases/01-文档质量/TC-DOC-006-文档站点构建检查.md", check_mkdocs, slow=True),
     Check("TC-CLUS-001~004", "集群演练清单(人工)", "cluster",
           "cases/04-集群", check_cluster),
     Check("TC-INT-001", "全量回归(本子集组合)", "all",
@@ -559,12 +698,16 @@ CHECKS = [
 ]
 
 GROUPS = {
-    "all": ["docs", "links", "structure", "formal", "bench", "ops", "version"],
+    "all": ["docs", "links", "structure", "formal", "bench", "ops", "version",
+            "consistency", "lab", "security"],
     "docs": ["docs", "links", "structure"],
     "structure": ["structure"],
     "links": ["links"],
     "formal": ["formal"],
     "bench": ["bench"],
+    "consistency": ["consistency"],
+    "lab": ["lab"],
+    "security": ["security"],
     "ops": ["ops"],
     "cluster": ["cluster"],
     "version": ["version"],

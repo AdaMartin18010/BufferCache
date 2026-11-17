@@ -1,0 +1,3 @@
+# 开发与文档构建依赖（可选装；CI 与 mkdocs 构建检查使用）
+mkdocs>=1.6
+mkdocs-material>=9.5

@@ -1,0 +1,4 @@
+# BufferCache 项目 Python 依赖（scripts/ 与 Testing/ 运行时）
+# 版本锁定于 2026-11-17 实测环境；升级需过 self_verify 全量回归
+requests==2.34.2        # scripts/version_monitor.py
+PyYAML==6.0.3           # Testing/self_verify.py ops 检查（缺失时自动降级 SKIP）

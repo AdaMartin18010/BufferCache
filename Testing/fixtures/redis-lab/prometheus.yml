@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+scrape_configs:
+  - job_name: redis-lab
+    static_configs:
+      # host.docker.internal 指向宿主机的 redis-lab（sentinel-compose 映射 6379-6381/7001-7006）
+      - targets:
+          - redis-exporter:9121

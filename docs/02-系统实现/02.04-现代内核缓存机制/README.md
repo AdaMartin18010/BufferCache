@@ -85,7 +85,7 @@ Linux 内核页面缓存（Page Cache）与内存回收机制在 2021-2025 年�
 
 MGLRU（Multi-Generation LRU，Yu Zhao，Linux 6.1 合入）将页面组织为 **4 个代（generation）**：
 
-```
+```text
 gen 3（最年轻） ← 最近被多次访问的页面
 gen 2
 gen 1
@@ -141,7 +141,7 @@ DAMON 的核心是**区域采样（region-based sampling）**：
 
 DAMOS（DAMon-based OperationS）将监控接入动作管线：
 
-```
+```text
 访问监控（DAMON）→ 模式匹配（如"3 秒内访问 < N 次的区域"）→ 动作执行
 动作类型：
 - pageout：回收冷页（先于 LRU 压力触发，主动腾出内存）

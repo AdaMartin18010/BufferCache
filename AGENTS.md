@@ -37,6 +37,10 @@ scripts/
 ├── benchmark/trace_benchmark.py  Trace 驱动算法基准（LRU/LFU/S3-FIFO）
 └── formal/               TLA+ 规约（LRU/ARC 已通过 TLC）+ run.bat
 reports/                  code_scan_report.md / code_test_report.md（实测数据）
+AI_Skill/                 AI 协作技能库：SKILL.md 兼容格式，16 个技能（项目主题映射+国际前沿专项）
+                          + 制作规范/模板/示例模型/用例/权威来源索引（季度评审对齐第三批）
+Testing/                  测试与自我验证体系：cases/ 五组 15 个用例（文档质量/形式化基准/运维部署/集群/集成）
+                          + self_verify.py 统一入口（验证→纠正→修正→回归→登记闭环）
 ```
 
 ## 3. 文档规范（质量门禁，强制执行）
@@ -80,6 +84,10 @@ reports/                  code_scan_report.md / code_test_report.md（实测数�
 ## 5. 工具链与验证命令
 
 ```bash
+# 0. 统一自我验证入口（首选，聚合 1-4 + 结构与运维检查；失败给用例修正指引）
+python Testing/self_verify.py all          # 全量；--ci 模式失败非零退出
+python Testing/self_verify.py links --path AI_Skill   # 新技能提交前的链接自查
+
 # 1. 文档代码块测试（Python 全量，约 1 分钟；目标：0 失败）
 python scripts/code_test_framework.py --test python
 
@@ -91,6 +99,7 @@ python scripts/benchmark/trace_benchmark.py
 
 # 4. 链接自查（新文档提交前）
 #    用脚本检查新文档内全部 .md 相对链接可解析（参照历次验证做法）
+python Testing/self_verify.py links --path <目录>
 
 # 5. 文档统计口径
 find docs -name "*.md" -not -path "*/archive/*" | wc -l   # 当前 249（含 STATUS 等）
@@ -117,4 +126,5 @@ find docs -name "*.md" -not -path "*/archive/*" | wc -l   # 当前 249（含 STA
 
 ## 8. 变更记录
 
+- **2026-11**：建立 AI_Skill/（16 个 SKILL.md 兼容技能 + 规范/模板/示例/用例/权威来源索引）与 Testing/（五组 15 用例 + self_verify.py 统一入口，验证→纠正→修正→回归→登记闭环）；self_verify 上线时全库链接体检并纠正存量死链 65 处（导航层级错误与旧文件名遗留，archive/ 按冻结约定排除）；版本事实季度对齐（Redis 8.10、Valkey 9.1.3、Linux 7.2、vLLM-Mooncake 集成）登记于 AI_Skill 权威来源索引。
 - **2026-01**：建立本文件。固化 2026-01 全面分析与四批执行形成的规范、工具链、禁令与进度。

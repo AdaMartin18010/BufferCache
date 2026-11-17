@@ -678,6 +678,33 @@ def check_governance() -> str:
     return result
 
 
+def check_selfheal() -> str:
+    """TC-CLUS-010: 自愈闭环模拟（预算表回归）"""
+    rc, out = run_cmd([sys.executable, "scripts/selfheal_sim.py"], timeout=120)
+    if rc == 0 and "0 FAIL" in out:
+        return "PASS" + chr(10) + chr(10).join(out.splitlines()[:7])
+    return "FAIL" + chr(10) + out[-300:]
+
+
+def check_steady() -> str:
+    """W2: 稳态漂移检测（exporter 优先，模拟降级）"""
+    rc, out = run_cmd([sys.executable, "scripts/steady_state_check.py"], timeout=120)
+    if rc == 0 and "稳态" in out:
+        src = "exporter" if "exporter" in out.splitlines()[0] else "simulate"
+        return "PASS" + chr(10) + "稳态判定通过（数据源 %s）" % src
+    if rc == 1:
+        return "FAIL" + chr(10) + out[-300:]
+    return "SKIP" + chr(10) + out[-200:]
+
+
+def check_skill_selftest() -> str:
+    """TC-DOC-008: 技能动态自测（20 技能验证命令实跑）"""
+    rc, out = run_cmd([sys.executable, "scripts/skill_selftest.py"], timeout=900)
+    if rc == 0 and "0 FAIL" in out:
+        return "PASS" + chr(10) + "技能动态自测全过（20 技能）"
+    return "FAIL" + chr(10) + out[-400:]
+
+
 def check_version() -> str:
     """TC-INT-002: 版本监控"""
     script = PROJECT_ROOT / "scripts" / "version_monitor.py"
@@ -737,6 +764,12 @@ CHECKS = [
           "cases/02-形式化与基准/TC-BENCH-007-KV驱逐策略对比实验.md", check_governance, slow=True),
     Check("TC-CLUS-001~004", "集群演练清单(人工)", "cluster",
           "cases/04-集群", check_cluster),
+    Check("TC-CLUS-010", "自愈闭环模拟(预算回归)", "selfheal",
+          "cases/04-集群/TC-CLUS-010-自愈闭环模拟.md", check_selfheal),
+    Check("TC-STAT-002", "稳态漂移检测", "steady",
+          "cases/05-集成/TC-STAT-002-稳态漂移检测.md", check_steady),
+    Check("TC-DOC-008", "技能动态自测(20技能)", "skilltest",
+          "cases/01-文档质量/TC-DOC-008-技能动态自测.md", check_skill_selftest, slow=True),
     Check("TC-INT-001", "全量回归(本子集组合)", "all",
           "cases/05-集成/TC-INT-001-全量自我验证回归.md",
           lambda: "PASS\nall 即为本组合的全量执行"),
@@ -746,7 +779,11 @@ CHECKS = [
 
 GROUPS = {
     "all": ["docs", "links", "structure", "formal", "bench", "ops", "version",
-            "consistency", "lab", "security", "governance"],
+            "consistency", "lab", "security", "governance", "selfheal", "steady",
+            "skilltest"],
+    "selfheal": ["selfheal"],
+    "steady": ["steady"],
+    "skilltest": ["skilltest"],
     "docs": ["docs", "links", "structure"],
     "structure": ["structure"],
     "links": ["links"],

@@ -11,7 +11,7 @@ description: 分布式缓存放置算法（一致性哈希/虚拟节点/Rendezvo
 
 - **覆盖**：一致性哈希、虚拟节点、Rendezvous（HRW）、变种算法、扩缩容再平衡。
 - **适用**：设计缓存分片/路由层；评估扩缩容成本；评审 01.03 文档。
-- **不适用**：单节点替换策略（→ cache-algorithms-*）；分布式一致性协议（→ distributed-architecture）。
+- **不适用**：单节点替换策略（→ cache-algorithms-fundamentals / cache-algorithms-advanced）；分布式一致性协议（→ distributed-architecture）。
 
 ## 2. 核心要点
 

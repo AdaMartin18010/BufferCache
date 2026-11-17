@@ -11,7 +11,7 @@ description: 缓存运维与测试体系（Ansible/Terraform/Helm 部署验证�
 
 - **覆盖**：Ansible/Terraform/Helm 部署验证、GitLab CI/Jenkins/GitHub Actions、Prometheus/Grafana 监控、集群部署/运维/故障/容量、可观测性。
 - **适用**：执行部署验证；运行故障演练；评审 07 文档；接入 CI。
-- **不适用**：应用缓存模式设计（→ cache-architecture-patterns）；纯算法实验（→ cache-algorithms-*）。
+- **不适用**：应用缓存模式设计（→ cache-architecture-patterns）；纯算法实验（→ cache-algorithms-fundamentals / cache-algorithms-advanced）。
 
 ## 2. 核心要点
 

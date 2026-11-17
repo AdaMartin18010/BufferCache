@@ -79,6 +79,20 @@ def main():
         status = "PASS" if not (missing_skill or missing_doc) else "DRIFT"
         results.append((check_id, status, missing_skill, missing_doc))
 
+    # 结构检查：技能分流目标必须真实存在（防止 → 不存在的技能）
+    import re
+    skills_dir = ROOT / "AI_Skill" / "skills"
+    existing = {p.name for p in skills_dir.iterdir() if p.is_dir()}
+    ref_pat = re.compile(
+        r'→\s*(cache-[a-z-]+|redis-[a-z-]+|os-[a-z-]+|llm-[a-z-]+|cloud-[a-z-]+'
+        r'|elastic-[a-z-]+|learning-[a-z-]+|cpu-[a-z-]+|db-[a-z-]+'
+        r'|modern-[a-z-]+|distributed-[a-z-]+)')
+    for sk in sorted(skills_dir.rglob("SKILL.md")):
+        for m in ref_pat.finditer(sk.read_text(encoding="utf-8")):
+            name = m.group(1)
+            if name not in existing:
+                results.append((f"ref:{sk.parent.name}->{name}", "DRIFT", [name], []))
+
     drift = [r for r in results if r[1] == "DRIFT"]
     for cid, st, ms, md in results:
         line = f"[{st}] {cid}"

@@ -11,7 +11,7 @@ description: 缓存架构模式（Cache-Aside/Read-Through/Write-Through/Write-B
 
 - **覆盖**：Cache-Aside、Read-Through、Write-Through、Write-Behind、Refresh-Ahead；穿透/雪崩/击穿/热点/大 Key 治理。
 - **适用**：应用缓存方案设计；评审 04.01/04.04 文档；故障复盘归因。
-- **不适用**：单节点算法（→ cache-algorithms-*）；部署运维（→ cache-operations-testing）。
+- **不适用**：单节点算法（→ cache-algorithms-fundamentals / cache-algorithms-advanced）；部署运维（→ cache-operations-testing）。
 
 ## 2. 核心要点
 

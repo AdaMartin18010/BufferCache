@@ -1,5 +1,5 @@
-# MX-D RS STR 种子资产：std TcpStream RESP 客户端冒烟（无 crates.io 依赖）
-# 用法: cargo run -- --addr 127.0.0.1:6379 --pass lab-password   RC: 0=PASS
+// MX-D RS STR 种子资产：std TcpStream RESP 客户端冒烟（无 crates.io 依赖）
+// 用法: cargo run -- --addr 127.0.0.1:6379 --pass lab-password   RC: 0=PASS（或 rustc 直编）
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 use std::time::Duration;

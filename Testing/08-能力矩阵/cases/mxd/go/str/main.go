@@ -1,5 +1,5 @@
-# MX-D GO STR 种子资产：stdlib RESP 客户端冒烟（无外部依赖，规避模块拉取失败）
-# 用法: go run main.go -addr 127.0.0.1:6379 -pass lab-password   RC: 0=PASS
+// MX-D GO STR 种子资产：stdlib RESP 客户端冒烟（无外部依赖，规避模块拉取失败）
+// 用法: go run main.go -addr 127.0.0.1:6379 -pass lab-password   RC: 0=PASS
 package main
 
 import (

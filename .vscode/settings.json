@@ -35,5 +35,6 @@
   
   // 文件末尾新行
   "files.insertFinalNewline": true,
-  "files.trimFinalNewlines": true
+  "files.trimFinalNewlines": true,
+  "sarif-viewer.connectToGithubCodeScanning": "off"
 }

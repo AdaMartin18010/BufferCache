@@ -1,0 +1,6 @@
+code	name	source
+TLA	TLA+ 模型检查	scripts/formal
+TRACE	Trace 驱动基准	scripts/benchmark/trace_benchmark.py
+SIM	离散模拟实验	scripts/（kv_evict/cache_sim 类）
+COQ	Coq 机械化证明	docs/06-扩展计划 执行计划 §5 B3
+UNIT	性质单元测试	Testing/测试框架规范 §2

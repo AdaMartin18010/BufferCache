@@ -1,0 +1,7 @@
+code	name	source
+KILL	节点宕机	TC-CLUS-003/004
+PART	网络分区	剧本 S3/TC-CLUS-007
+LAT	网络延迟	toxiproxy 注入（TC-CLUS-007）
+DISK	磁盘压力	剧本 S2
+CLK	时钟漂移	剧本 S2
+SLOW	慢查询阻塞	07.09.03 稳态

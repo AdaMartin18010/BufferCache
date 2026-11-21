@@ -1,0 +1,4 @@
+code	name	source
+SIM	模拟实验	TC-BENCH-002
+LIVE	GPU 实测	环境缺席 SKIP（无 GPU 宿主）
+TRACE	trace 回放	MX-F 扩展

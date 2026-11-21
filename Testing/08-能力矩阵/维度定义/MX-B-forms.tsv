@@ -1,0 +1,5 @@
+code	name	source
+SA	单机 standalone	Testing/fixtures/redis-lab
+REPL	主从复制	sentinel-compose redis-s1/s2
+SENT	Sentinel 哨兵	sentinel-compose sentinel-1..3
+CLU	Cluster 三主三从	Testing/fixtures/redis-lab cluster 7001-7006

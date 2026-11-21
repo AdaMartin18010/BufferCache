@@ -1,0 +1,3 @@
+code	name	source
+SUITE	场景化基准套件	scripts/benchmark/suite/bench_suite.py
+MTIER	memtier 压测	MX-C 扩展（镜像就绪后）

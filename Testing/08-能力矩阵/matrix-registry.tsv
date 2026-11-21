@@ -1,0 +1,3 @@
+# 能力矩阵用例注册表（机读）
+# 格式: case_id	mx	dim1	dim2	[dim3]	status	note
+# status ∈ seed(种子人工精修)/gen(生成器铺底)/done(执行闭环)

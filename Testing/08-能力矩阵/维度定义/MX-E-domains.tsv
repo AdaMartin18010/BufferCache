@@ -1,0 +1,7 @@
+code	name	source
+TLS	传输加密	docs/04-架构设计/04.02-缓存安全
+AUTH	认证与授权	docs/04-架构设计/04.02-缓存安全
+RENAME	危险命令重命名	docs/04-架构设计/04.02-缓存安全
+AUDIT	审计日志	docs/04-架构设计/04.02-缓存安全
+NET	网络隔离/绑定	docs/04-架构设计/04.02-缓存安全
+SENSCFG	敏感配置巡检	TC-OPS-003

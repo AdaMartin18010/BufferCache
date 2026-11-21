@@ -719,6 +719,20 @@ def check_version() -> str:
     return f"FAIL\n版本监控退出码 {rc}：\n{out[-400:]}"
 
 
+def check_matrix() -> str:
+    """TC-MX-001: 能力矩阵一致对账（维度/注册表/用例文件/ID 唯一性/适用矩阵齐全性）"""
+    script = PROJECT_ROOT / "Testing" / "08-能力矩阵" / "tools" / "matrix_gen.py"
+    if not script.exists():
+        return "SKIP\n08-能力矩阵/tools/matrix_gen.py 不存在"
+    rc, out = run_cmd([sys.executable, str(script), "--check"], timeout=120)
+    tail = out.strip().splitlines()[-1] if out.strip() else ""
+    if rc == 0:
+        return f"PASS\n{tail}"
+    if rc == 2:
+        return f"SKIP\n{tail}"
+    return f"FAIL\n{tail or out[-300:]}"
+
+
 CHECKS = [
     Check("TC-DOC-001", "文档代码块可运行性(Python)", "docs",
           "cases/01-文档质量/TC-DOC-001-文档代码块可运行性.md", check_code_blocks, slow=True),
@@ -775,12 +789,14 @@ CHECKS = [
           lambda: "PASS\nall 即为本组合的全量执行"),
     Check("TC-INT-002", "版本监控", "version",
           "cases/05-集成/TC-INT-002-CI集成与版本监控.md", check_version),
+    Check("TC-MX-001", "能力矩阵一致对账", "matrix",
+          "Testing/08-能力矩阵/README.md", check_matrix),
 ]
 
 GROUPS = {
     "all": ["docs", "links", "structure", "formal", "bench", "ops", "version",
             "consistency", "lab", "security", "governance", "selfheal", "steady",
-            "skilltest"],
+            "skilltest", "matrix"],
     "selfheal": ["selfheal"],
     "steady": ["steady"],
     "skilltest": ["skilltest"],

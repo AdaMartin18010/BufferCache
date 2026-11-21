@@ -1,0 +1,4 @@
+code	name	source
+STATIC	静态检查	self_verify security/ops 组
+LIVE	实载验证	MX-E 用例（L2）
+DYN	动态探测	MX-E 扩展（开放项）

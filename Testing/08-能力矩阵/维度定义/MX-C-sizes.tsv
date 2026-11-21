@@ -1,0 +1,5 @@
+code	name	source
+B256	256B	bench_suite
+B1K	1KB	07.05.04 容量规划
+B8K	8KB	bench_suite
+B64K	64KB	MX-C 扩展

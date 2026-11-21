@@ -87,6 +87,10 @@ Testing/                  测试与自我验证体系：cases/ 七组 36 用例�
 
 **工作队列协议**：唯一执行入口 = `Testing/hermes-queue.md`；新任务由主控规划入队。队列项自治级：**A**=全自治（执行+回填+简报）；**P**=执行后须主控审计再入库；**U**=用户门（破坏性/长耗时/正文内容变更）。hermes 完成一项 = 产物落 Testing/output/ + 执行记录节回填 + registry status 流转 + 简报；主控抽审 1/3 可回放。hermes 发现计划外工作 → 队列"观察区"登记，主控裁定后入队，不得自行执行。
 
+**执行三件套（每项必做）**：①产物落 `Testing/output/`（gitignore 证据）②用例文件"## 执行记录"节追加（时间/命令/关键值/判定）③`matrix-registry.tsv` status 列流转（seed/gen→done）。环境值一律从 `Testing/fixtures/lab.env` 取（单一事实源），禁止用例内扩散硬编码。
+
+**执行契约**：开工=source lab.env→运行时探测（容器适配规范 §1）→`self_verify all` 基线绿→按队列执行入口映射取件；FAIL 走用例修正指引、环境缺 SKIP 登记观察区、**禁止伪造通过**；SKIP 格环境解锁后由主控改派。
+
 **并行规则**：两轨常并行（主控规划/审计新批 ∥ hermes 执行已入队批）；hermes 轨内独立文件域可并行（B1/B2/B3 内容批），共享环境/端口项串行（A2→A3→A4 因 6379 时段避让），同一文件唯一写者；任何一轨提交前 L1（self_verify）预跑绿，CI 为共同门禁。
 
 **汇报**：hermes 每队列项简报（做了什么/结果/产物路径/下一步）；主控并入用例全景统计 §6/§7 + STATUS 变更记录。
@@ -160,6 +164,7 @@ find docs -name "*.md" -not -path "*/archive/*" | wc -l   # 当前 259（含 STA
 | 新增数学公式 | 公式-文献对照表.md + 所在文档出处标注 |
 | 新增/归档文档 | STATUS.md（状态/计数/变更记录）、ARCHIVE.md（归档时） |
 | 工作队列项增删/状态流转 | Testing/hermes-queue.md（执行轨唯一入口） |
+| 实验室环境值变更（运行时/镜像/密码/端口/容器名） | Testing/fixtures/lab.env（单一事实源）+ 用例全景统计 §8 快照 + STATUS 变更记录 |
 | 新增脚本/工具 | scripts 相关 README、§5 工具链、code_test_framework 兼容性 |
 | 批次任务完成 | 国际前沿对齐与质量治理执行计划.md（结果列） |
 | 目录结构变化 | 本文件 §2、根 README 结构图 |

@@ -271,6 +271,28 @@ def gen():
     return 0
 
 
+CASE_LINT_REQUIRED_HEAD = ("用例ID", "矩阵格", "自动化", "运行时", "目的", "关联")
+CASE_LINT_REQUIRED_SEC = ("## 前置条件", "## 步骤", "## 预期结果", "## 通过标准", "## 失败纠正与修正指引")
+
+
+def case_lint():
+    """用例文件结构门禁：十要素（6 头部字段+5 必备节）+ 文件名与头部 ID 一致"""
+    errs = []
+    for f in sorted(CASES.rglob("TC-*.md")):
+        t = f.read_text(encoding="utf-8", errors="replace")
+        head = "\n".join(t.splitlines()[:12])
+        for k in CASE_LINT_REQUIRED_HEAD:
+            if k not in head:
+                errs.append(f"{f.name}: 缺头部字段 {k}")
+        for s in CASE_LINT_REQUIRED_SEC:
+            if s not in t:
+                errs.append(f"{f.name}: 缺必备节 {s}")
+        if f"**用例ID**：{f.stem} " not in t and f"**用例ID**：{f.stem}｜" not in t and f"**用例ID**：{f.stem}|" not in t:
+            if f"**用例ID**：{f.stem}" not in t:
+                errs.append(f"{f.name}: 头部 ID 与文件名不一致")
+    return errs
+
+
 def check():
     errs = []
     dims = {}
@@ -316,6 +338,7 @@ def check():
                 errs.append(f"适用矩阵缺矩阵节: {head}")
     else:
         errs.append("缺 适用矩阵.md")
+    errs += case_lint()
     return errs
 
 

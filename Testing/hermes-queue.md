@@ -10,8 +10,9 @@
 
 ## 例行项 0（每次开工自检，A）
 
-- 容器运行时探测（容器适配规范 §1：docker→podman→k8s→无）并记录；
-- `python Testing/self_verify.py all` 确认 L1 基线绿（红=先修或上报，不带病执行）。
+- `python3 Testing/08-能力矩阵/tools/env_doctor.py check --fix`（环境治理器自检：运行时 podman 唯一/镜像钉版状态/lab 容器健康+可逆修正/端口/磁盘；产物 Testing/output/env_doctor/）
+- 容器运行时探测确认（容器适配规范 §1：podman 唯一；缺失→NO_CONTAINER 记录）
+- `python Testing/self_verify.py all` 确认 L1 基线绿（红=先修或上报，不带病执行）
 
 ## 执行队列
 
@@ -32,6 +33,25 @@
 | 13 | Q-C1 | C1 | L4 月度验收 12 月首跑（生成器设计稿 §7） | acceptance_2026-12.md 生成+覆盖率判定 | A | 2026-12 月末 | ⬜ | |
 | 14 | Q-C3 | C3 | 季度评审 2027-02（三步模板 §7） | 对称差表刷新+断言清单扩充 | U | 2027-02 | ⬜ | |
 
+## 执行入口映射（ID → 具体命令/判据指针；hermes 按此取件）
+
+| ID | 执行入口 |
+| -- | -------- |
+| Q-A2 | §7 任务卡 A2 + `Testing/fixtures/redis-lab/monitoring-compose.yml`（podman run 等价形；exporter/grafana 缺镜像→单栈降级路径见卡内） |
+| Q-A3 | `podman run` 哨兵栈等价形 + `redis-cli -p 26379..26381 SENTINEL master mymaster`（判据=卡内） |
+| Q-A4 | 哨兵栈 + `Testing/cases/04-集群/TC-CLUS-003/006` 步骤（podman 适配 §2）；回填 07.04.03/07.05.04 |
+| Q-M3a | `podman pull docker.io/memtier_benchmark/memtier_benchmark`（registry 恢复后；见 lab.env BC_REGISTRY_NOTE） |
+| Q-M3b | `main.go/main.rs -ops <族>` 已铺 16 格；余量=PY 行 2 格（STREAM/BITMAP 文档示例锚定） |
+| Q-M3c | `scripts/benchmark/trace_benchmark.py` + kv_evict 扩算法（用例格=执行规格） |
+| Q-M3d | Coq 安装（Windows 安装器/opam）→ B3 引理链（§7 规格） |
+| Q-M4 | `python3 Testing/08-能力矩阵/tools/mx_runner.py`（全量基线）→ 失败项逐格处置 → 回填三件套 |
+| Q-B1/B2/B3 | §7 任务卡规格（章节大纲/结构/引理链）；U 级执行前须用户背书 |
+| Q-C2 | §7 C2 运行器设计稿（git 受控脚本+薄壳 cron） |
+| Q-C1 | §7 C1 生成器设计稿（history log + GitHub API 数据源） |
+| Q-C3 | §7 C3 三步模板（对称差刷新+断言扩充+版本复核） |
+
+**执行纪律**：FAIL 走用例修正指引；环境缺→SKIP 并登记观察区；**禁止伪造通过**；产物只写 Testing/output/。
+
 ## 依赖与并行编排
 
 - 串行链：Q-A2→Q-A3→Q-A4（端口/环境时段）；Q-M3d→Q-B3；其余互相独立。
@@ -42,7 +62,8 @@
 
 | 登记时间 | 事项 | 状态 |
 | -- | ---- | ---- |
-| 2026-11-21 | redis:8-alpine 镜像源故障（daocloud DNS 失效/registry-1 拒连），基线暂为 7-alpine 口径——镜像恢复后重建基线 | 待办（触发式，无需在域等待） |
+| 2026-11-21 | redis:8-alpine 镜像源故障（daocloud DNS 失效/registry-1 拒连），基线暂为 7-alpine 口径——镜像源恢复后走 `env_doctor.py update --image redis:8-alpine --bench`（拉取→改钉→重建容器→重建基线） | 待办（触发式，无需在域等待） |
+| 2026-11-21 | lab 容器 redis-bench-lab 间歇停止（env_doctor check 实证）——已 --fix 自修正；复发须查 podman machine 稳定性 | 已处置（观察） |
 
 ## 变更记录
 

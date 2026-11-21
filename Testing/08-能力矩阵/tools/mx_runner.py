@@ -15,7 +15,14 @@ ROOT = MX.parent.parent
 REG = MX / "matrix-registry.tsv"
 OUT = ROOT / "Testing" / "output" / "mx_runner"
 ASSETS = MX / "cases"
-LAB = {"addr": "127.0.0.1:6379", "pass": "lab-password"}
+
+# 实验室配置单一事实源（Testing/fixtures/lab.env）；缺失时用文件内默认值
+sys.path.insert(0, str(MX / "tools"))
+import labconf
+_CFG = labconf.load()
+LAB = {"addr": f"{_CFG['BC_REDIS_HOST']}:{_CFG['BC_REDIS_PORT']}", "pass": _CFG["BC_REDIS_PASS"],
+       "image": _CFG["BC_REDIS_IMAGE"], "container": _CFG["BC_LAB_CONTAINER"],
+       "rt_hint": _CFG["BC_RT"]}
 
 RT = None  # 容器运行时探测结果
 
@@ -126,7 +133,7 @@ def ephemeral(name, extra_args=None, timeout=180):
         return None
     podman(["rm", "-f", name], timeout=30)
     rc, _ = podman(["run", "-d", "--name", name] + extra_args +
-                   ["redis:7-alpine", "redis-server", "--requirepass", "lab-password"], timeout=120)
+                   [LAB["image"], "redis-server", "--requirepass", "lab-password"], timeout=120)
     if rc != 0:
         return None
     for _ in range(30):
@@ -169,7 +176,7 @@ def ex_mxe_rename(case_id):
     if not rt() or not redis_image():
         return "SKIP", "容器运行时或 redis 镜像缺失"
     podman(["rm", "-f", "mxc-rename"], timeout=30)
-    rc, _ = podman(["run", "-d", "--name", "mxc-rename", "redis:7-alpine", "redis-server",
+    rc, _ = podman(["run", "-d", "--name", "mxc-rename", LAB["image"], "redis-server",
                     "--requirepass", "lab-password",
                     "--rename-command", "FLUSHALL", "",
                     "--rename-command", "KEYS", "KEYS_HIDDEN"], timeout=120)
@@ -202,9 +209,9 @@ def ex_mxe_net(case_id):
     if not rt() or not redis_image():
         return "SKIP", "容器运行时或 redis 镜像缺失"
     podman(["rm", "-f", "mxc-net-a", "mxc-net-b"], timeout=30)
-    podman(["run", "-d", "--name", "mxc-net-a", "redis:7-alpine",
+    podman(["run", "-d", "--name", "mxc-net-a", LAB["image"],
             "redis-server", "--bind", "127.0.0.1", "--requirepass", "lab-password"], timeout=120)
-    podman(["run", "-d", "--name", "mxc-net-b", "redis:7-alpine",
+    podman(["run", "-d", "--name", "mxc-net-b", LAB["image"],
             "redis-server", "--protected-mode", "yes"], timeout=120)
 
     def wait_ready(name, need_auth):
@@ -232,11 +239,11 @@ def ex_mxe_net(case_id):
             # name DNS 亦缺——两条网络面断言在本环境不可执行（docker/全栈网络宿主可执行，用例保留）
             return "SKIP", f"pasta 网络容器间不可互通（A/B 同址 {ipa}），NET-LIVE 双断言需 docker 类网络宿主"
         # A: bind 127.0.0.1 → 同网络 sidecar 按 IP 直连应连接被拒（只监听容器回环）
-        rc, o1 = podman(["run", "--rm", "redis:7-alpine", "sh", "-c",
+        rc, o1 = podman(["run", "--rm", LAB["image"], "sh", "-c",
                          f"timeout 5 redis-cli -h {ipa} -a lab-password --no-auth-warning PING"], timeout=60)
         a1 = rc != 0 and ("Could not connect" in o1 or "refused" in o1 or rc == 124)
         # B: protected-mode + 无密码 → 同网络 sidecar 按 IP 直连应 DENIED
-        rc, o2 = podman(["run", "--rm", "redis:7-alpine", "sh", "-c",
+        rc, o2 = podman(["run", "--rm", LAB["image"], "sh", "-c",
                          f"timeout 5 redis-cli -h {ipb} PING"], timeout=60)
         a2 = "DENIED" in o2
         return ("PASS", f"bind-loopback-blocked={a1} protected-mode-denied={a2}") if a1 and a2 else \

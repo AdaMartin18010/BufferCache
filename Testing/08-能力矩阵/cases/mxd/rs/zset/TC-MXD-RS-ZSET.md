@@ -1,7 +1,7 @@
 # TC-MXD-RS-ZSET Rust redis-rs 客户端对 sorted set 操作族冒烟
 
 - **用例ID**：TC-MXD-RS-ZSET | **优先级**：P1 | **矩阵格**：MX-D / RS / ZSET
-- **自动化**：剧本型（gen 铺底） | **批次**：M2+ gen 2026-11-21
+- **自动化**：剧本型（gen 铺底） | **批次**：M2+ gen 2026-11-21 → enrich 充实 2026-11-21（8 操作族参数化，mx_runner 可执行）
 - **运行时**：DOCKER+PODMAN｜ANY（按手段）
 - **环境阻塞声明**：本格执行依赖外部资产（镜像/GPU/工具链等），未就绪时按测试框架规范 SKIP 不 FAIL，解锁后 hermes 执行
 - **目的**：Rust redis-rs 客户端对 sorted set 操作族冒烟
@@ -19,6 +19,12 @@
 # Then 每命令响应断言成立（enrich 批按操作族定序列）
 # And 连接清理无泄漏
 ```
+
+## 实测断言（enrich 批 2026-11-21）
+
+- **执行资产**：`cases/mxd/rs/str/main.rs`——stdlib RESP 客户端（零外部依赖），步骤规格=[期望,命令,参数...]（{K}=每族唯一键 runid）
+- **断言序列**：ZADD→:1 / ZSCORE→1 / ZRANGE 0 -1→m
+- **判定**：全步骤期望匹配=PASS；任一失配=FAIL（输出 got/want 对）
 
 ## 预期结果
 

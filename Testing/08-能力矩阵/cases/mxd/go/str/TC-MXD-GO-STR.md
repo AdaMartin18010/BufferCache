@@ -20,6 +20,12 @@ cd Testing/08-能力矩阵/cases/mxd/go/str && go run main.go -addr 127.0.0.1:63
 # Then 四断言 PASS（+OK / v1 / :1 / (nil)），末行 GO-STR-SMOKE-PASS，RC=0
 ```
 
+## 实测断言（enrich 批 2026-11-21）
+
+- **执行资产**：`cases/mxd/go/str/main.go`——stdlib RESP 客户端（零外部依赖），步骤规格=[期望,命令,参数...]（{K}=每族唯一键）
+- **断言序列**：SET→+OK / GET→v1 / DEL→:1 / GET→(nil)（唯一键 runid 隔离）
+- **判定**：全步骤期望匹配=PASS；任一失配=FAIL（输出 got/want 对）
+
 ## 预期结果
 
 - 4×PASS + GO-STR-SMOKE-PASS

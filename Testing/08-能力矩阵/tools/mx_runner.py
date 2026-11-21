@@ -82,29 +82,41 @@ def ex_mxa_unit(case_id):
     return "FAIL", out.strip().splitlines()[-3:]
 
 
-def ex_mxd_go(case_id):
-    if not shutil.which("go"):
-        return "SKIP", "go 工具链缺失"
-    if not lab_redis_up():
-        return "SKIP", f"lab redis {LAB['addr']} 未在跑"
-    rc, out = sh(["go", "run", str(ASSETS / "mxd" / "go" / "str" / "main.go"),
-                  "-addr", LAB["addr"], "-pass", LAB["pass"]], timeout=240)
-    tail = [l for l in out.splitlines() if l.startswith(("PASS", "FAIL", "GO-"))]
-    return ("PASS", "; ".join(tail[-2:])) if rc == 0 else ("FAIL", out[-200:])
+_MXD_BUILT = {}
 
 
-def ex_mxd_rs(case_id):
-    if not shutil.which("rustc"):
-        return "SKIP", "rustc 缺失"
-    if not lab_redis_up():
-        return "SKIP", f"lab redis {LAB['addr']} 未在跑"
-    exe = OUT / "rs_str_smoke.exe"
-    rc, out = sh(["rustc", str(ASSETS / "mxd" / "rs" / "str" / "main.rs"), "-o", str(exe)], timeout=240)
-    if rc != 0:
-        return "FAIL", "rustc 编译失败: " + out[-200:]
-    rc, out = sh([str(exe), "--addr", LAB["addr"], "--pass", LAB["pass"]], timeout=120)
-    tail = [l for l in out.splitlines() if l.startswith(("PASS", "FAIL"))]
-    return ("PASS", f"{len(tail)} 断言 OK") if rc == 0 else ("FAIL", out[-200:])
+def ex_mxd(lang):
+    def _run(case_id):
+        op = case_id.split("-")[3].lower()          # TC-MXD-GO-HASH → hash
+        if not lab_redis_up():
+            return "SKIP", f"lab redis {LAB['addr']} 未在跑"
+        if lang == "go":
+            if not shutil.which("go"):
+                return "SKIP", "go 工具链缺失"
+            exe = OUT / "mxd_go.exe"
+            if "go" not in _MXD_BUILT:
+                rc, out = sh(["go", "build", "-o", str(exe), str(ASSETS / "mxd" / "go" / "str" / "main.go")], timeout=300)
+                if rc != 0:
+                    return "FAIL", "go build: " + out[-200:]
+                _MXD_BUILT["go"] = True
+            rc, out = sh([str(exe), "-addr", LAB["addr"], "-pass", LAB["pass"], "-ops", op], timeout=120)
+        else:
+            if not shutil.which("rustc"):
+                return "SKIP", "rustc 缺失"
+            exe = OUT / "mxd_rs.exe"
+            if "rs" not in _MXD_BUILT:
+                rc, out = sh(["rustc", str(ASSETS / "mxd" / "rs" / "str" / "main.rs"), "-o", str(exe)], timeout=300)
+                if rc != 0:
+                    return "FAIL", "rustc: " + out[-200:]
+                _MXD_BUILT["rs"] = True
+            rc, out = sh([str(exe), "--addr", LAB["addr"], "--pass", LAB["pass"], "--ops", op], timeout=120)
+        tail = [l for l in out.splitlines() if l.startswith(("PASS", "FAIL"))]
+        return ("PASS", tail[-1] if tail else "OK") if rc == 0 else ("FAIL", out[-200:])
+    return _run
+
+
+def ex_mxd_go_legacy(case_id):
+    return ex_mxd("go")(case_id)
 
 
 def ephemeral(name, extra_args=None, timeout=180):
@@ -242,8 +254,22 @@ EXECUTORS = {
     "TC-MXA-2Q-UNIT": ex_mxa_unit,
     "TC-MXA-SLRU-UNIT": ex_mxa_unit,
     "TC-MXA-ARC-UNIT": ex_mxa_unit,
-    "TC-MXD-GO-STR": ex_mxd_go,
-    "TC-MXD-RS-STR": ex_mxd_rs,
+    "TC-MXD-GO-STR": ex_mxd("go"),
+    "TC-MXD-GO-HASH": ex_mxd("go"),
+    "TC-MXD-GO-LIST": ex_mxd("go"),
+    "TC-MXD-GO-ZSET": ex_mxd("go"),
+    "TC-MXD-GO-STREAM": ex_mxd("go"),
+    "TC-MXD-GO-BITMAP": ex_mxd("go"),
+    "TC-MXD-GO-EXPIRE": ex_mxd("go"),
+    "TC-MXD-GO-TXLUA": ex_mxd("go"),
+    "TC-MXD-RS-STR": ex_mxd("rs"),
+    "TC-MXD-RS-HASH": ex_mxd("rs"),
+    "TC-MXD-RS-LIST": ex_mxd("rs"),
+    "TC-MXD-RS-ZSET": ex_mxd("rs"),
+    "TC-MXD-RS-STREAM": ex_mxd("rs"),
+    "TC-MXD-RS-BITMAP": ex_mxd("rs"),
+    "TC-MXD-RS-EXPIRE": ex_mxd("rs"),
+    "TC-MXD-RS-TXLUA": ex_mxd("rs"),
     "TC-MXE-AUTH-LIVE": ex_mxe_auth,
     "TC-MXE-RENAME-LIVE": ex_mxe_rename,
     "TC-MXE-NET-LIVE": ex_mxe_net,

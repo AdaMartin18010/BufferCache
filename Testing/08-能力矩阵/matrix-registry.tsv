@@ -3,3 +3,121 @@
 # status ∈ seed(种子人工精修)/gen(生成器铺底)/done(执行闭环)
 TC-MXE-AUTH-LIVE	MXE	AUTH	LIVE		seed	M2 2026-11-21 种子：requirepass/ACL 最小权限三断言
 TC-MXE-RENAME-LIVE	MXE	RENAME	LIVE		seed	M2 2026-11-21 种子：rename-command 运行时验证+持久性边界声明
+TC-MXA-LRU-UNIT	MXA	LRU	UNIT		seed	M2+ 2026-11-21：LRU 栈序不变式属性单测（props_test.py）
+TC-MXA-S3FIFO-UNIT	MXA	S3FIFO	UNIT		seed	M2+ 2026-11-21：S3-FIFO 三队列不变式（props_test.py 同资产）
+TC-MXD-GO-STR	MXD	GO	STR		seed	M2+ 2026-11-21：stdlib RESP 四断言冒烟（main.go）
+TC-MXD-RS-STR	MXD	RS	STR		seed	M2+ 2026-11-21：std TcpStream RESP 四断言冒烟（main.rs）
+TC-MXE-NET-LIVE	MXE	NET	LIVE		seed	M2+ 2026-11-21：bind/protected-mode 双拒绝断言
+TC-MXB-SENT-PART	MXB	SENT	PART		seed	M2+ 2026-11-21：哨兵 quorum 隔离 no-failover 演练（裁定升级 ○N→●）
+TC-MXA-LRU-COQ	MXA	LRU	COQ		gen	gen 铺底
+TC-MXA-FIFO-TLA	MXA	FIFO	TLA		gen	gen 铺底
+TC-MXA-FIFO-TRACE	MXA	FIFO	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-FIFO-COQ	MXA	FIFO	COQ		gen	gen 铺底
+TC-MXA-FIFO-UNIT	MXA	FIFO	UNIT		gen	gen 铺底
+TC-MXA-LFU-TLA	MXA	LFU	TLA		gen	gen 铺底
+TC-MXA-LFU-SIM	MXA	LFU	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-LFU-COQ	MXA	LFU	COQ		gen	gen 铺底
+TC-MXA-LFU-UNIT	MXA	LFU	UNIT		gen	gen 铺底
+TC-MXA-S3FIFO-TLA	MXA	S3FIFO	TLA		gen	gen 铺底
+TC-MXA-S3FIFO-SIM	MXA	S3FIFO	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-S3FIFO-COQ	MXA	S3FIFO	COQ		gen	gen 铺底
+TC-MXA-SIEVE-TLA	MXA	SIEVE	TLA		gen	gen 铺底
+TC-MXA-SIEVE-TRACE	MXA	SIEVE	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-SIEVE-COQ	MXA	SIEVE	COQ		gen	gen 铺底
+TC-MXA-SIEVE-UNIT	MXA	SIEVE	UNIT		gen	gen 铺底
+TC-MXA-ARC-TRACE	MXA	ARC	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-ARC-SIM	MXA	ARC	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-ARC-COQ	MXA	ARC	COQ		gen	gen 铺底
+TC-MXA-ARC-UNIT	MXA	ARC	UNIT		gen	gen 铺底
+TC-MXA-2Q-TLA	MXA	2Q	TLA		gen	gen 铺底
+TC-MXA-2Q-TRACE	MXA	2Q	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-2Q-SIM	MXA	2Q	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-2Q-COQ	MXA	2Q	COQ		gen	gen 铺底
+TC-MXA-2Q-UNIT	MXA	2Q	UNIT		gen	gen 铺底
+TC-MXA-SLRU-TLA	MXA	SLRU	TLA		gen	gen 铺底
+TC-MXA-SLRU-TRACE	MXA	SLRU	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-SLRU-SIM	MXA	SLRU	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-SLRU-COQ	MXA	SLRU	COQ		gen	gen 铺底
+TC-MXA-SLRU-UNIT	MXA	SLRU	UNIT		gen	gen 铺底
+TC-MXA-CLOCKPRO-TLA	MXA	CLOCKPRO	TLA		gen	gen 铺底
+TC-MXA-CLOCKPRO-TRACE	MXA	CLOCKPRO	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-CLOCKPRO-SIM	MXA	CLOCKPRO	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-CLOCKPRO-COQ	MXA	CLOCKPRO	COQ		gen	gen 铺底
+TC-MXA-CLOCKPRO-UNIT	MXA	CLOCKPRO	UNIT		gen	gen 铺底
+TC-MXA-LHD-TLA	MXA	LHD	TLA		gen	gen 铺底
+TC-MXA-LHD-TRACE	MXA	LHD	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-LHD-SIM	MXA	LHD	SIM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXA-LHD-COQ	MXA	LHD	COQ		gen	gen 铺底
+TC-MXA-LHD-UNIT	MXA	LHD	UNIT		gen	gen 铺底
+TC-MXB-REPL-DISK	MXB	REPL	DISK		gen	gen 铺底
+TC-MXB-REPL-CLK	MXB	REPL	CLK		gen	gen 铺底
+TC-MXB-REPL-SLOW	MXB	REPL	SLOW		gen	gen 铺底
+TC-MXB-SENT-DISK	MXB	SENT	DISK		gen	gen 铺底
+TC-MXB-SENT-CLK	MXB	SENT	CLK		gen	gen 铺底
+TC-MXB-SENT-SLOW	MXB	SENT	SLOW		gen	gen 铺底
+TC-MXB-CLU-DISK	MXB	CLU	DISK		gen	gen 铺底
+TC-MXB-CLU-CLK	MXB	CLU	CLK		gen	gen 铺底
+TC-MXB-CLU-SLOW	MXB	CLU	SLOW		gen	gen 铺底
+TC-MXD-PY-STREAM	MXD	PY	STREAM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-PY-BITMAP	MXD	PY	BITMAP		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-HASH	MXD	GO	HASH		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-LIST	MXD	GO	LIST		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-ZSET	MXD	GO	ZSET		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-STREAM	MXD	GO	STREAM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-BITMAP	MXD	GO	BITMAP		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-EXPIRE	MXD	GO	EXPIRE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-GO-TXLUA	MXD	GO	TXLUA		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-HASH	MXD	RS	HASH		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-LIST	MXD	RS	LIST		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-ZSET	MXD	RS	ZSET		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-STREAM	MXD	RS	STREAM		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-BITMAP	MXD	RS	BITMAP		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-EXPIRE	MXD	RS	EXPIRE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXD-RS-TXLUA	MXD	RS	TXLUA		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXE-TLS-LIVE	MXE	TLS	LIVE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXE-TLS-DYN	MXE	TLS	DYN		gen	gen 铺底
+TC-MXE-AUTH-DYN	MXE	AUTH	DYN		gen	gen 铺底
+TC-MXE-RENAME-DYN	MXE	RENAME	DYN		gen	gen 铺底
+TC-MXE-AUDIT-LIVE	MXE	AUDIT	LIVE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXE-AUDIT-DYN	MXE	AUDIT	DYN		gen	gen 铺底
+TC-MXE-NET-DYN	MXE	NET	DYN		gen	gen 铺底
+TC-MXE-SENSCFG-LIVE	MXE	SENSCFG	LIVE		gen	gen 铺底
+TC-MXE-SENSCFG-DYN	MXE	SENSCFG	DYN		gen	gen 铺底
+TC-MXF-PREFIX-LIVE	MXF	PREFIX	LIVE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-PREFIX-TRACE	MXF	PREFIX	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-EVICT-LIVE	MXF	EVICT	LIVE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-EVICT-TRACE	MXF	EVICT	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-PAGING-SIM	MXF	PAGING	SIM		gen	gen 铺底
+TC-MXF-PAGING-LIVE	MXF	PAGING	LIVE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-PAGING-TRACE	MXF	PAGING	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-QUANT-SIM	MXF	QUANT	SIM		gen	gen 铺底
+TC-MXF-QUANT-LIVE	MXF	QUANT	LIVE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXF-QUANT-TRACE	MXF	QUANT	TRACE		gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R55-B1K-SUITE	MXC	R55	B1K	SUITE	gen	gen 铺底
+TC-MXC-R55-B8K-SUITE	MXC	R55	B8K	SUITE	gen	gen 铺底
+TC-MXC-R55-B64K-SUITE	MXC	R55	B64K	SUITE	gen	gen 铺底
+TC-MXC-R91-B1K-SUITE	MXC	R91	B1K	SUITE	gen	gen 铺底
+TC-MXC-R91-B64K-SUITE	MXC	R91	B64K	SUITE	gen	gen 铺底
+TC-MXC-R28-B1K-SUITE	MXC	R28	B1K	SUITE	gen	gen 铺底
+TC-MXC-R28-B8K-SUITE	MXC	R28	B8K	SUITE	gen	gen 铺底
+TC-MXC-R28-B64K-SUITE	MXC	R28	B64K	SUITE	gen	gen 铺底
+TC-MXC-R19-B256-SUITE	MXC	R19	B256	SUITE	gen	gen 铺底
+TC-MXC-R19-B1K-SUITE	MXC	R19	B1K	SUITE	gen	gen 铺底
+TC-MXC-R19-B8K-SUITE	MXC	R19	B8K	SUITE	gen	gen 铺底
+TC-MXC-R19-B64K-SUITE	MXC	R19	B64K	SUITE	gen	gen 铺底
+TC-MXC-R55-B256-MTIER	MXC	R55	B256	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R55-B1K-MTIER	MXC	R55	B1K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R55-B8K-MTIER	MXC	R55	B8K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R55-B64K-MTIER	MXC	R55	B64K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R91-B256-MTIER	MXC	R91	B256	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R91-B1K-MTIER	MXC	R91	B1K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R91-B8K-MTIER	MXC	R91	B8K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R91-B64K-MTIER	MXC	R91	B64K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R28-B256-MTIER	MXC	R28	B256	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R28-B1K-MTIER	MXC	R28	B1K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R28-B8K-MTIER	MXC	R28	B8K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R28-B64K-MTIER	MXC	R28	B64K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R19-B256-MTIER	MXC	R19	B256	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R19-B1K-MTIER	MXC	R19	B1K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R19-B8K-MTIER	MXC	R19	B8K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）
+TC-MXC-R19-B64K-MTIER	MXC	R19	B64K	MTIER	gen	gen 铺底（env-blocked，执行 SKIP 待解锁）

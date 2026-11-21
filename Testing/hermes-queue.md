@@ -20,9 +20,9 @@
 | 1 | Q-A2 | A2 | 监控全栈+告警四连（TC-OPS-005-C；podman 适配+降级路径见 §7 任务卡） | 四规则 /alerts 可见触发；回填用例执行记录 | A | prometheus 在盘；exporter/grafana 缺镜像→单栈降级 | ⬜ | |
 | 2 | Q-A3 | A3 | Podman 冒烟（sentinel 环境 PING） | 三哨兵 PONG+主从角色正确 | A | redis:7-alpine 在盘 | ⬜ | |
 | 3 | Q-A4 | A4 | 轮换首轮：TC-CLUS-003（Sentinel RTO）+ TC-CLUS-006（备份 RPO）+对账抽检 | 用例通过标准列；RTO/RPO 回填 07.04.03/07.05.04 | P | 哨兵栈 podman run 等价形；与 Q-A2 错开 6379 时段 | ⬜ | |
-| 4 | Q-M3a | M3 | memtier 镜像获取（registry 恢复后重试）→ MX-C MTIER 半表 16 格 ○E→● | 镜像在盘+一格试跑 | A | 网络/registry | ⬜ | |
-| 5 | Q-M3b | M3 | Go/Rust 客户端资产（MX-D 两行 16 格 ○E→●）：最小示例+工具链实证 | go/rust 客户端对 lab redis STR 冒烟通过 | A | go/cargo 在盘（已具备） | ⬜ | |
-| 6 | Q-M3c | M3 | trace_benchmark/kv_evict 算法扩展（FIFO/SIEVE/ARC/2Q/SLRU 随用例格转 ●） | 扩展算法跑通+结果入 01.05.04 登记段 | A | 无 | ⬜ | |
+| 4 | Q-M3a | M3 | memtier 镜像获取（registry 恢复后重试）→ MX-C MTIER 半表 16 格执行 | 镜像在盘+一格试跑 | A | 网络/registry（**16 格用例实体已由主控 2026-11-21 gen 铺底完成**） | ⬜ | |
+| 5 | Q-M3b | M3 | Go/Rust 客户端资产（MX-D 两行余下 14 格 ○E→●；**STR 两格已由主控 2026-11-21 编写原生用例+资产，本项余 HASH~TXLUA 扩展**）：示例+工具链实证 | go/rust 客户端对 lab redis 冒烟通过 | A | go/cargo 在盘（已具备） | ⬜ | |
+| 6 | Q-M3c | M3 | trace_benchmark/kv_evict 算法扩展执行（**用例实体已 gen 铺底**：MX-A TRACE/SIM 格 24 件） | 扩展算法跑通+结果入 01.05.04 登记段 | A | 无 | ⬜ | |
 | 7 | Q-M3d | M3 | Coq 环境+FIFO 竞争比引理链起手（B3 联动，MX-A FIFO×COQ 格） | coqc 编译通过记录 | P | Coq 安装 | ⬜ | |
 | 8 | Q-M4 | M4 | ●格执行闭环：TC-MXE-AUTH/RENAME-LIVE 实跑 + MX-B 关联格执行记录回填 + registry seed→done | 看板 ●格执行率可统计 | P | Q-A2~A4 环境 | ⬜ | |
 | 9 | Q-B1 | B1 | LLM 推理部署实践篇（章节大纲见 §7；含版本事实双源核实） | 密度 250-400 行/≥4 代码块/≥3 表；公式入对照表 | U | 无（可并行） | ⬜ | |

@@ -62,9 +62,12 @@ def registry_rows():
     return rows
 
 
-def existing_case_ids():
+def existing_case_ids(include_matrix=False):
     ids = set()
-    for base in (ROOT / "Testing" / "cases", CASES):
+    bases = [ROOT / "Testing" / "cases"]
+    if include_matrix:
+        bases.append(CASES)
+    for base in bases:
         for f in base.rglob("TC-*.md"):
             m = re.match(r"(TC-[A-Za-z0-9-]+?)(?:-\d+)?\.md$", f.name)
             if m:
@@ -132,7 +135,8 @@ def stats():
                 continue
             cells = []
             for s in secs:
-                cells += re.findall(r"\|\s*(●|○A|○E|○N|待)\s*(?=\|)", s)
+                # 单元格形态：纯标记（"待"）/ 标记+关联（"●→FORM-001"/"●(B3)"）/ 标记+理由（"○E 镜像缺"）
+                cells += re.findall(r"\|\s*(●|○A|○E|○N|待)(?=[→(\s|])", s)
             board[mx] = {
                 "total": len(cells),
                 "applicable": cells.count("●"),

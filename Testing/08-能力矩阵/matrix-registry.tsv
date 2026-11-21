@@ -1,3 +1,5 @@
 # 能力矩阵用例注册表（机读）
 # 格式: case_id	mx	dim1	dim2	[dim3]	status	note
 # status ∈ seed(种子人工精修)/gen(生成器铺底)/done(执行闭环)
+TC-MXE-AUTH-LIVE	MXE	AUTH	LIVE		seed	M2 2026-11-21 种子：requirepass/ACL 最小权限三断言
+TC-MXE-RENAME-LIVE	MXE	RENAME	LIVE		seed	M2 2026-11-21 种子：rename-command 运行时验证+持久性边界声明

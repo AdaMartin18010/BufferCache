@@ -8,7 +8,7 @@
 
 ### 07.01.01 Ansible部署实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Ansible基础**：安装、基本概念、Playbook结构
 - **Redis单机部署**：Playbook结构、配置文件模板、变量定义
@@ -27,7 +27,7 @@
 
 ### 07.01.02 Terraform基础设施即代码 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Terraform基础**：安装、基本概念、Provider配置
 - **AWS Redis集群部署**：ElastiCache Redis配置、安全组配置
@@ -45,7 +45,7 @@
 
 ### 07.01.03 Helm Chart实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Helm基础**：Helm安装、Chart结构、Values配置
 - **Redis Chart部署**：Chart模板、Values配置、部署命令

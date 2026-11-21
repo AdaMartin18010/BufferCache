@@ -8,7 +8,7 @@
 
 ### 08.01.01 Raft协议实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Raft协议基础**：Raft核心概念、Raft状态机、选举机制、日志复制
 - **Redis Raft实现**：Redis Raft配置、Raft集群部署、Raft实践案例
@@ -24,7 +24,7 @@
 
 ### 08.01.02 Paxos协议实践 ✅
 
-**完成度：100%**
+**完成度：100%**:
 
 - **Paxos协议基础**：Paxos核心概念、Paxos算法、Multi-Paxos
 - **Redis Paxos实现**：Paxos实现代码、Paxos集群部署

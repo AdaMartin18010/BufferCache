@@ -59,12 +59,26 @@ def redis_image():
 
 # ---------------- 执行器实现（case_id → fn() -> (verdict, detail)） ----------------
 
+UNIT_CLASS = {
+    "TC-MXA-LRU-UNIT": "TestLRUProperties",
+    "TC-MXA-S3FIFO-UNIT": "TestS3FIFOProperties",
+    "TC-MXA-FIFO-UNIT": "TestExtendedAlgos",
+    "TC-MXA-LFU-UNIT": "TestExtendedAlgos",
+    "TC-MXA-SIEVE-UNIT": "TestExtendedAlgos",
+    "TC-MXA-2Q-UNIT": "TestExtendedAlgos",
+    "TC-MXA-SLRU-UNIT": "TestExtendedAlgos",
+    "TC-MXA-ARC-UNIT": "TestExtendedAlgos",
+}
+
+
 def ex_mxa_unit(case_id):
-    cls = "TestLRUProperties" if "LRU" in case_id else "TestS3FIFOProperties"
+    cls = UNIT_CLASS.get(case_id)
+    if not cls:
+        return "SKIP", "该算法单测类未映射（enrich 批登记）"
     script = ASSETS / "mxa" / "unit" / "props_test.py"
-    rc, out = sh([sys.executable, str(script), cls], timeout=180)
+    rc, out = sh([sys.executable, str(script), cls], timeout=240)
     if rc == 0:
-        return "PASS", f"unittest {cls} OK"
+        return "PASS", f"unittest {cls} OK（含 {case_id.split('-')[2]} 参考实现属性断言）"
     return "FAIL", out.strip().splitlines()[-3:]
 
 
@@ -222,6 +236,12 @@ def ex_mxe_net(case_id):
 EXECUTORS = {
     "TC-MXA-LRU-UNIT": ex_mxa_unit,
     "TC-MXA-S3FIFO-UNIT": ex_mxa_unit,
+    "TC-MXA-FIFO-UNIT": ex_mxa_unit,
+    "TC-MXA-LFU-UNIT": ex_mxa_unit,
+    "TC-MXA-SIEVE-UNIT": ex_mxa_unit,
+    "TC-MXA-2Q-UNIT": ex_mxa_unit,
+    "TC-MXA-SLRU-UNIT": ex_mxa_unit,
+    "TC-MXA-ARC-UNIT": ex_mxa_unit,
     "TC-MXD-GO-STR": ex_mxd_go,
     "TC-MXD-RS-STR": ex_mxd_rs,
     "TC-MXE-AUTH-LIVE": ex_mxe_auth,

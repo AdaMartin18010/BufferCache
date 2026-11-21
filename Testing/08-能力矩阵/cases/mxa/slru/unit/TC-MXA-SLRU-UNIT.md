@@ -1,7 +1,7 @@
 # TC-MXA-SLRU-UNIT SLRU 分段 LRU 的性质单元测试验证（源：docs/01-理论基础/01.02-高级替换算法 01.02.05）
 
 - **用例ID**：TC-MXA-SLRU-UNIT | **优先级**：P1 | **矩阵格**：MX-A / SLRU / UNIT
-- **自动化**：剧本型（gen 铺底） | **批次**：M2+ gen 2026-11-21
+- **自动化**：剧本型（gen 铺底） | **批次**：M2+ gen 2026-11-21 → enrich 充实 2026-11-21（参考实现+属性断言落地，mx_runner 可执行）
 - **运行时**：DOCKER+PODMAN｜ANY（按手段）
 - **目的**：SLRU 分段 LRU 的性质单元测试验证（源：docs/01-理论基础/01.02-高级替换算法 01.02.05）
 - **关联**：docs/01-理论基础/01.02-高级替换算法 01.02.05 / Testing/测试框架规范 §2（维度定义 TSV 行；enrich 批从源文档派生具体数值断言）
@@ -19,6 +19,13 @@
 # And 边界序列不破坏机制语义
 # And 恢复/清理现场
 ```
+
+## 实测断言（enrich 批 2026-11-21）
+
+- **参考实现**：`props_test.py SLRUCache`（probation/protected 两段；protected 上限=cap-cap/4，01.02.05 语义）
+- **不变式**：prob∩prot=∅；总占用≤cap
+- **机制**：probation 命中升 protected MRU；protected 溢出降其 LRU 至 probation MRU；淘汰取 probation LRU
+- **And** 随机序列容量/无重复/确定性三不变式
 
 ## 预期结果
 
